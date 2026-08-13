@@ -1,0 +1,52 @@
+# ── Unity 기본 ────────────────────────────────────────────────
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Mm]emoryCaptures/
+/[Rr]ecordings/
+
+# 자동 생성되는 프로젝트/솔루션 파일
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+.vs/
+.gradle/
+ExportedObj/
+.consulo/
+
+# 빌드 산출물
+*.apk
+*.aab
+*.app
+*.unitypackage
+crashlytics-build.properties
+
+# ── 이 프로젝트 ───────────────────────────────────────────────
+# Unity 가 만드는 백업/디버그 폴더
+/ARZONE_BackUpThisFolder_ButDontShipItWithYourGame/
+/ARZONE-App_BurstDebugInformation_DoNotShip/
+
+# 씬 편집 백업 (tools/arb.py 가 저장할 때마다 남긴다 — 946개 1.5GB)
+Assets/Project/Scenes/*.unity.bak*
+
+# Vuforia SDK 패키지 (138MB — 깃허브 100MB 제한 초과).
+# clone 후 이 파일을 Packages/ 에 직접 넣어야 프로젝트가 열린다. README 참고.
+Packages/*.tgz
+
+# macOS
+.DS_Store

@@ -1,0 +1,10 @@
+<svg width="120" height="48" viewBox="0 0 120 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+<!-- 배경(유리)만. 아이콘/글자는 씬의 CallIcon/CallLabel. 알파는 Image.color a=0.2 로 준다 -->
+<path d="M0 12C0 5.37258 5.37258 0 12 0H108C114.627 0 120 5.37258 120 12V36C120 42.6274 114.627 48 108 48H12C5.37259 48 0 42.6274 0 36V12Z" fill="url(#paint0_linear_1258_5471)"/>
+<defs>
+<linearGradient id="paint0_linear_1258_5471" x1="94.5417" y1="-74.1493" x2="122.398" y2="44.4054" gradientUnits="userSpaceOnUse">
+<stop stop-color="#999999"/>
+<stop offset="1" stop-color="#060914"/>
+</linearGradient>
+</defs>
+</svg>

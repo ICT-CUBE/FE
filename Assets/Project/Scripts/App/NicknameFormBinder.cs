@@ -12,6 +12,10 @@ namespace ARZone
         [SerializeField] TMP_InputField nickname;
         [SerializeField] List<Button> profiles = new List<Button>();
 
+        [Header("링 상태 (선택=보라+체크 배지 포함 / 미선택=회색 — 자식 \"Ring\" 의 스프라이트만 바꾼다)")]
+        [SerializeField] Sprite ringOnSprite;
+        [SerializeField] Sprite ringOffSprite;
+
         [Header("표시")]
         [SerializeField] TMP_Text hintText;      // 평소엔 안내, 틀리면 빨간 에러
         [SerializeField] TMP_Text counterText;   // "3 / 10"
@@ -61,16 +65,25 @@ namespace ARZone
                 hintText.color = DesignTokens.Primitive.Status.Red;   // 시안: 항상 빨강
             }
 
-            // 선택된 캐릭터만 밝게
+            // 선택 표시: 링(항상 보임, 선택=보라/미선택=회색) + 딤(미선택일 때만)
             for (int i = 0; i < profiles.Count; i++)
             {
                 if (profiles[i] == null) continue;
                 var img = profiles[i].GetComponent<Image>();
                 if (img != null) img.color = Color.white;   // 사진은 원본 색 그대로
 
-                // 선택 표시는 원 외곽선으로 (자식 "Ring" 이 있으면 켜고 끈다)
+                bool isSelected = i == selected;
+
                 var ring = profiles[i].transform.Find("Ring");
-                if (ring != null) ring.gameObject.SetActive(i == selected);
+                if (ring != null)
+                {
+                    ring.gameObject.SetActive(true);   // 링은 항상 보인다
+                    var ringImg = ring.GetComponent<Image>();
+                    if (ringImg != null) ringImg.sprite = isSelected ? ringOnSprite : ringOffSprite;
+                }
+
+                var dim = profiles[i].transform.Find("Dim");
+                if (dim != null) dim.gameObject.SetActive(!isSelected);   // 딤은 미선택일 때만
             }
 
             bool ok = r.IsValid && selected >= 0;

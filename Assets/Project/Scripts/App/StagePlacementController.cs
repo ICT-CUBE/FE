@@ -19,9 +19,15 @@ namespace ARZone
         float prevAngle = float.NaN;
         bool active;
 
-        public void Begin(ARSessionController s)
+        // 놓을 대상. AR 소환은 무대가 아니라 아바타를 놓는다 (유저 지시 2026-08-18).
+        public enum Target { Stage, Avatar }
+
+        Target target = Target.Stage;
+
+        public void Begin(ARSessionController s, Target t = Target.Stage)
         {
             session = s;
+            target = t;
             prevAngle = float.NaN;
             active = session != null;
         }
@@ -61,14 +67,15 @@ namespace ARZone
                     : null;
                 if (plane != null && plane.alignment != PlaneAlignment.HorizontalUp) continue;
 
-                session.PlaceStage(h.pose);
+                if (target == Target.Avatar) session.PlaceAvatar(h.pose);
+                else session.PlaceStage(h.pose);
                 break;
             }
         }
 
         void Rotate(Vector2 a, Vector2 b)
         {
-            var stage = session.Stage;
+            var stage = target == Target.Avatar ? session.Avatar : session.Stage;
             if (stage == null) return;
 
             float angle = Mathf.Atan2(b.y - a.y, b.x - a.x) * Mathf.Rad2Deg;

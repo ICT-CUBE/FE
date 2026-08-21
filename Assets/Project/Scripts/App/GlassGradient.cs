@@ -42,6 +42,16 @@ namespace ARZone
 
         static readonly List<UIVertex> buf = new List<UIVertex>();
 
+        // 런타임에 만드는 것(대화 말풍선 등)에 값을 넣어준다.
+        // 축은 t = t0 + du·u + dv·v (u,v 는 rect 안 0~1, v 는 위→아래).
+        public void Set(Color a, Color b, float axisT0, float axisDu, float axisDv)
+        {
+            from = a; to = b; alpha = 1f;
+            t0 = axisT0; du = axisDu; dv = axisDv;
+            var g = GetComponent<Graphic>();
+            if (g != null) g.SetVerticesDirty();
+        }
+
         public override void ModifyMesh(VertexHelper vh)
         {
             if (!IsActive() || vh == null || vh.currentVertCount == 0) return;

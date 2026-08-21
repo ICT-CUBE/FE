@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -51,6 +52,12 @@ namespace ARZone
         [SerializeField] Button btnSaveApp;
         [SerializeField] Button btnSavePhone;
 
+        [Header("사진 상세 (시안 '사진 상세')")]
+        [SerializeField] string photoDetailScreen = "PhotoDetail";
+        [SerializeField] RawImage photoDetailImage;
+        [SerializeField] Button btnPhotoShare;   // 좌 64² — 시안 화살표가 저장 시트로 간다
+        [SerializeField] Button btnPhotoSave;    // 우 64² — 캡처 상세와 같은 관례(다운로드=저장 시트)
+
         // 캡처 상세의 'AR 다시 경험' → 확인 모달 → 스캔부터 다시
         [Header("AR 다시 경험")]
         [SerializeField] Button btnCapReplay;
@@ -66,6 +73,8 @@ namespace ARZone
         float watchSeconds;
         bool counting;
         bool subscribed;
+        int shotsAtStageStart;   // 이번 관람이 시작될 때의 촬영 장수
+        bool counted;
         CaptureService.Entry selected;
 
         void OnEnable()
@@ -84,6 +93,8 @@ namespace ARZone
             Hook(btnCapConfirm, OnCapSaveSheet);
             Hook(btnCapSave, OnCapSaveSheet);
             Hook(btnCapShare, OnCapShare);
+            Hook(btnPhotoShare, OnPhotoShare);     // 좌 — OS 기본 공유 시트
+            Hook(btnPhotoSave, OnCapSaveSheet);    // 우 — 저장 위치 시트
             Hook(btnCapReplay, OnCapReplay);
             Hook(btnReplayCancel, CloseReplayModal);
             Hook(btnReplayStart, OnReplayStart);
@@ -137,6 +148,8 @@ namespace ARZone
             Unhook(btnCapConfirm, OnCapSaveSheet);
             Unhook(btnCapSave, OnCapSaveSheet);
             Unhook(btnCapShare, OnCapShare);
+            Unhook(btnPhotoShare, OnPhotoShare);
+            Unhook(btnPhotoSave, OnCapSaveSheet);
             Unhook(btnCapReplay, OnCapReplay);
             Unhook(btnReplayCancel, CloseReplayModal);
             Unhook(btnReplayStart, OnReplayStart);
@@ -192,22 +205,39 @@ namespace ARZone
                 if (session != null && session.Video != null) stagePlayer.Bind(session.Video);
                 if (!stagePlayer.HasVideo)
                     Debug.LogWarning("[ARMedia] VideoPlayer 를 못 찾음 — ARRig 가 생성됐는지 확인");
+                if (!counted) { shotsAtStageStart = capture != null ? capture.Count : 0; counted = true; }
                 stagePlayer.Play();
             }
             else if (id == ReportId)
             {
                 stagePlayer.Pause();
+                // 이번 관람에서 찍은 것만 리포트에 넣는다 (앞서 AR 소환에서 찍어둔 건 제외)
                 if (report != null && capture != null)
-                    report.Populate(stageTitle, capture.Captures, watchSeconds);
+                    report.Populate(stageTitle, ShotsThisSession(), watchSeconds);
             }
             else if (id != DetailId)
             {
-                // AR 흐름을 완전히 벗어남 — 초기화
+                // AR 관람 흐름을 완전히 벗어남 — 재생만 정리한다.
+                // ⚠ 예전엔 여기서 capture.Clear() 로 촬영분을 통째로 지웠다.
+                //   그런데 이 분기에는 AR 소환 흐름(ARSummon/SummonReport)과 '오늘 찍은 사진들'
+                //   까지 전부 걸려서, 촬영하자마자 리포트로 넘어가는 순간 사진이 다 날아갔다
+                //   (2026-08-18 실기: 리포트가 하얗고 오늘 찍은 사진들이 0장).
+                //   촬영분은 하루치 자산이고 CaptureService 가 디스크로도 들고 있으므로 지우지 않는다.
                 stagePlayer.Stop();
                 stagePlayer.Unbind();
                 watchSeconds = 0f;
-                if (capture != null) capture.Clear();
+                counted = false;
             }
+        }
+
+        // 이번 관람 세션에서 찍은 것만 잘라낸다
+        IReadOnlyList<CaptureService.Entry> ShotsThisSession()
+        {
+            var all = capture.Captures;
+            int from = Mathf.Clamp(shotsAtStageStart, 0, all.Count);
+            var slice = new List<CaptureService.Entry>(all.Count - from);
+            for (int i = from; i < all.Count; i++) slice.Add(all[i]);
+            return slice;
         }
 
         void OnPlayPause()
@@ -280,6 +310,19 @@ namespace ARZone
             flashOverlay.color = new Color(c.r, c.g, c.b, a);
         }
 
+        // '오늘 찍은 사진들' 등 다른 화면에서도 같은 사진 상세를 연다
+        public void ShowCaptureDetail(CaptureService.Entry e) => OnCardClicked(e);
+
+        // 시안 '사진 상세' — 캡처 상세(캡처 상세.svg)와는 다른 화면이다.
+        // 제목·장수·관람시간 없이 사진 전체(0,106 412×618) + 공유·다운로드 64² 만 있다.
+        public void ShowPhotoDetail(CaptureService.Entry e)
+        {
+            selected = e;
+            UiUtil.FitCover(photoDetailImage, e?.Texture);
+            if (ScreenManager.Instance != null && !string.IsNullOrEmpty(photoDetailScreen))
+                ScreenManager.Instance.Show(photoDetailScreen);
+        }
+
         void OnCardClicked(CaptureService.Entry e)
         {
             selected = e;
@@ -328,6 +371,14 @@ namespace ARZone
         }
 
         void OnCapShare() => Debug.Log("[ARMedia] 공유는 아직 미구현 — 네이티브 공유 필요");
+
+        // 시안 주석: "공유 : OS 기본 공유 시트를 호출"
+        void OnPhotoShare()
+        {
+            if (capture == null || selected == null) return;
+            if (!capture.ShareToOS(selected))
+                Toast.Show("공유할 수 없어요.", ToastBottom);
+        }
 
         void OnCardSaveClicked(CaptureService.Entry e)
         {

@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.Video;
 using UnityEngine.XR.ARFoundation;
+using UnityEngine.XR.ARSubsystems;
 
 namespace ARZone
 {
@@ -13,6 +14,10 @@ namespace ARZone
         [SerializeField] GameObject stagePrefab;   // StageGrid + StageScreen
         [SerializeField] Camera uiCamera;          // 평소 쓰는 Main Camera. AR 중엔 끈다.
 
+        [Header("AR 소환 — 무대 대신 세울 아바타")]
+        [SerializeField] GameObject avatarPrefab;      // avatar_main.vrm 의 루트
+        [SerializeField] float avatarHeight = 1f;      // 현실에 놓일 키(m). 모델 원래 높이에 맞춰 스케일한다
+
         [Header("무대 크기 — 놓는 거리에 맞춰 화면 안에 들어오게")]
         [SerializeField, Range(0.3f, 1f)] float viewFitRatio = 0.75f;  // 화면의 몇 %까지 채울지
         [SerializeField] float minStageScale = 0.1f;
@@ -20,7 +25,10 @@ namespace ARZone
 
         GameObject rig;
         GameObject stage;
+        GameObject avatar;
         AudioListener uiListener;
+
+        public Transform Avatar => avatar != null ? avatar.transform : null;
 
         public bool IsRunning => rig != null;
         public bool StagePlaced { get; private set; }
@@ -58,8 +66,9 @@ namespace ARZone
         public void StopSession()
         {
             if (stage != null) Destroy(stage);
+            if (avatar != null) Destroy(avatar);
             if (rig != null) Destroy(rig);
-            rig = null; stage = null;
+            rig = null; stage = null; avatar = null;
             PlaneManager = null; RaycastManager = null; Video = null; StageGrid = null;
             StagePlaced = false;
 
@@ -166,6 +175,81 @@ namespace ARZone
         public void ShowGrid(bool on)
         {
             if (StageGrid != null) StageGrid.SetActive(on);
+        }
+
+        // 무대를 통째로 감춘다. AR 소환 흐름은 무대 없이 도는데(유저 지시 2026-08-18),
+        // 스테이지 흐름으로 돌아왔을 때 다시 놓게 만들지 않으려고 지우지 않고 끄기만 한다.
+        public void ShowStage(bool on)
+        {
+            if (stage != null && stage.activeSelf != on) stage.SetActive(on);
+        }
+
+        // AR 소환: 무대 대신 아바타를 바닥에 세운다. 없으면 만들고, 있으면 옮긴다.
+        public void PlaceAvatar(Pose pose)
+        {
+            if (avatarPrefab == null)
+            {
+                Debug.LogError("[ARSession] avatarPrefab 이 비어 있음 — ARManagers 인스펙터에 avatar_main.vrm 루트를 넣을 것");
+                return;
+            }
+
+            if (avatar == null)
+            {
+                avatar = Instantiate(avatarPrefab, pose.position, Quaternion.identity);
+                avatar.SetActive(true);
+                FitAvatarHeight();
+                FaceAvatarToCamera();
+                Debug.Log($"[ARSession] 아바타 소환 {pose.position} 스케일 {avatar.transform.localScale.x:0.000}");
+            }
+            else
+            {
+                // 회전은 손으로 돌린 값을 유지하고 위치만 옮긴다 (무대와 같은 규칙)
+                avatar.transform.position = pose.position;
+            }
+        }
+
+        // 모델 원래 키가 제각각이라 실측해서 avatarHeight 에 맞춘다
+        void FitAvatarHeight()
+        {
+            if (avatar == null || avatarHeight <= 0f) return;
+            avatar.transform.localScale = Vector3.one;
+            var b = WorldBounds(avatar);
+            if (b.size.y <= 0.0001f) return;
+            avatar.transform.localScale = Vector3.one * (avatarHeight / b.size.y);
+        }
+
+        // VRM 은 +Z 가 정면이다 (아바타 홈에서 회전 0 일 때 등이 보이는 것으로 확인).
+        void FaceAvatarToCamera()
+        {
+            var cam = Camera.main;
+            if (avatar == null || cam == null) return;
+            var toCam = cam.transform.position - avatar.transform.position;
+            toCam.y = 0f;
+            if (toCam.sqrMagnitude > 0.0001f)
+                avatar.transform.rotation = Quaternion.LookRotation(toCam.normalized, Vector3.up);
+        }
+
+        public void ShowAvatar(bool on)
+        {
+            if (avatar != null && avatar.activeSelf != on) avatar.SetActive(on);
+        }
+
+        // 전면/후면 카메라 전환. AR 소환의 '전후면 변경' 버튼이 부른다.
+        // requestedFacingDirection 은 다음 프레임에 반영되므로 요청값을 기준으로 뒤집는다.
+        public bool FlipCamera()
+        {
+            var cam = rig != null ? rig.GetComponentInChildren<ARCameraManager>(true) : null;
+            if (cam == null)
+            {
+                Debug.LogWarning("[ARSession] ARCameraManager 를 못 찾음 — 카메라 전환 불가");
+                return false;
+            }
+            cam.requestedFacingDirection =
+                cam.requestedFacingDirection == CameraFacingDirection.User
+                    ? CameraFacingDirection.World
+                    : CameraFacingDirection.User;
+            Debug.Log($"[ARSession] 카메라 전환 → {cam.requestedFacingDirection}");
+            return true;
         }
 
         void OnDestroy() => StopSession();

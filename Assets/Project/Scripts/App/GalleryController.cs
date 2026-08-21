@@ -240,15 +240,16 @@ namespace ARZone
                 pimg.preserveAspect = false;
                 pimg.raycastTarget = false;
 
-                // 체크박스 — 시안: 타일 좌상단 +10.5, 20×20
+                // 체크박스 — 시안(갤러리 편집-1): 원 지름 20, 타일 좌상단에서 중심 (20,20).
+                // 스프라이트 잉크가 캔버스의 60/72 라 박스를 24 로 줘야 원이 20 으로 그려진다.
                 var check = new GameObject("Check", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
                 check.transform.SetParent(tile.transform, false);
                 var crt = check.GetComponent<RectTransform>();
                 crt.anchorMin = new Vector2(0f, 1f);
                 crt.anchorMax = new Vector2(0f, 1f);
                 crt.pivot = new Vector2(0f, 1f);
-                crt.anchoredPosition = new Vector2(10.5f, -10.5f);
-                crt.sizeDelta = new Vector2(20f, 20f);
+                crt.anchoredPosition = new Vector2(8f, -8f);
+                crt.sizeDelta = new Vector2(24f, 24f);
                 var cimg = check.GetComponent<Image>();
                 cimg.raycastTarget = false;
                 bool isSel = selected.Contains(pi);

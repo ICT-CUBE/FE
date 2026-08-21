@@ -22,10 +22,14 @@ namespace ARZone
         [SerializeField] float gap = 16f;
         [SerializeField] Sprite checkOff;
         [SerializeField] Sprite checkOn;
+        // 시안 사진 카드는 모서리 r8 이다 (path M20 134C20 129.582 …).
+        // RawImage 는 스프라이트로 못 깎으므로 이 스프라이트를 Mask 로 씌워 오려낸다.
+        [SerializeField] Sprite tileMask;
 
         [Header("저장")]
         [SerializeField] GameObject sheetSave;
         [SerializeField] CaptureService capture;
+        [SerializeField] ARMediaController media;    // 사진 상세(Screen_CaptureDetail) 를 여는 쪽
 
         bool picking;
         readonly HashSet<int> selected = new HashSet<int>();
@@ -80,7 +84,8 @@ namespace ARZone
         {
             if (content == null) return;
 
-            foreach (var t in tiles) if (t != null) Destroy(t);
+            // Destroy 는 프레임 끝 처리라 같은 프레임에 새 타일을 깔면 옛 타일이 위에 겹친다
+            foreach (var t in tiles) if (t != null) DestroyImmediate(t);
             tiles.Clear();
 
             for (int i = 0; i < Count; i++)
@@ -88,8 +93,11 @@ namespace ARZone
                 int col = i % 2;
                 int row = i / 2;
 
+                // 타일 = 라운드 마스크(Image+Mask) + 그 안에 사진(RawImage).
+                // Mask 는 그래픽을 스텐실에 그려 자식을 오려내므로 알파가 1 이어야 한다
+                // (showMaskGraphic 을 꺼도 알파 0 이면 자식이 통째로 사라진다).
                 var tile = new GameObject("Photo" + i, typeof(RectTransform), typeof(CanvasRenderer),
-                                          typeof(RawImage), typeof(Button));
+                                          typeof(Image), typeof(Mask), typeof(Button));
                 tile.transform.SetParent(content, false);
 
                 var rt = tile.GetComponent<RectTransform>();
@@ -99,7 +107,24 @@ namespace ARZone
                 rt.anchoredPosition = new Vector2(col * (tileW + gap), -row * (tileH + gap));
                 rt.sizeDelta = new Vector2(tileW, tileH);
 
-                tile.GetComponent<RawImage>().texture = capture.Captures[i].Texture;
+                var frame = tile.GetComponent<Image>();
+                frame.sprite = tileMask;
+                frame.type = Image.Type.Sliced;
+                frame.color = Color.white;
+                tile.GetComponent<Mask>().showMaskGraphic = false;
+
+                var photo = new GameObject("Img", typeof(RectTransform), typeof(CanvasRenderer), typeof(RawImage));
+                photo.transform.SetParent(tile.transform, false);
+                var prt = photo.GetComponent<RectTransform>();
+                // stretch 로 두면 이 프레임엔 rect 가 0 이라 FitCover 가 비율을 못 잰다 → 크기를 직접 준다
+                prt.anchorMin = prt.anchorMax = new Vector2(0f, 1f);
+                prt.pivot = new Vector2(0f, 1f);
+                prt.anchoredPosition = Vector2.zero;
+                prt.sizeDelta = new Vector2(tileW, tileH);
+                var raw = photo.GetComponent<RawImage>();
+                raw.raycastTarget = false;
+                // 촬영본은 화면 전체 비율(1080×2400 등)이라 카드(178×267)에 그냥 넣으면 눌린다
+                UiUtil.FitCover(raw, capture.Captures[i].Texture);
 
                 var chk = new GameObject("Check", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
                 chk.transform.SetParent(tile.transform, false);
@@ -107,8 +132,10 @@ namespace ARZone
                 crt.anchorMin = new Vector2(0f, 1f);
                 crt.anchorMax = new Vector2(0f, 1f);
                 crt.pivot = new Vector2(0f, 1f);
-                crt.anchoredPosition = new Vector2(10.5f, -10.5f);
-                crt.sizeDelta = new Vector2(20f, 20f);
+                // 시안: 원 지름 20, 타일 좌상단에서 중심 (20,20).
+                // 스프라이트 잉크가 캔버스의 60/72 라 박스를 24 로 줘야 원이 20 으로 그려진다.
+                crt.anchoredPosition = new Vector2(8f, -8f);
+                crt.sizeDelta = new Vector2(24f, 24f);
                 var ci = chk.GetComponent<Image>();
                 ci.raycastTarget = false;
                 ci.sprite = selected.Contains(i) ? checkOn : checkOff;
@@ -132,7 +159,14 @@ namespace ARZone
                 Refresh();
                 return;
             }
-            Debug.Log($"[TodayPhotos] 사진 상세 — {index}번");
+            // 사진 상세는 ARMediaController 가 이미 다 만들어 뒀다 (Screen_CaptureDetail).
+            if (media == null)
+            {
+                Debug.LogError("[TodayPhotos] media 가 비어 있음 — 인스펙터에서 ARManagers 를 넣을 것");
+                return;
+            }
+            if (capture == null || index < 0 || index >= capture.Captures.Count) return;
+            media.ShowPhotoDetail(capture.Captures[index]);   // 시안 '사진 상세'
         }
     }
 }

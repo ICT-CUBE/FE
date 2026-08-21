@@ -595,7 +595,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.141176, g: 0.156863, b: 0.192157, a: 1}
+  m_Color: {r: 0.058823530, g: 0.050980393, b: 0.09019608, a: 0.5}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -625,5 +625,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0099d873a2f8449ca14e8ce560ee5fc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ARZone.TokenStyle
-  color: 0
+  color: 3
   type: 0

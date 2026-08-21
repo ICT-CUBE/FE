@@ -168,7 +168,17 @@ namespace ARZone
         void Toggle(int i)
         {
             if (picked.Contains(i)) picked.Remove(i);
-            else picked.Add(i);
+            else
+            {
+                // 상한은 '고르는 순간' 에 막는다. 전송 때 막으면 6장째까지 선택돼 있다가
+                // 전송을 눌러야 토스트가 뜬다(2026-08-18 실기 신고).
+                if (picked.Count >= TalkDetailController.MaxAttachments)
+                {
+                    Toast.Show($"사진은 최대 {TalkDetailController.MaxAttachments}장까지 선택할 수 있어요.", 130f);
+                    return;
+                }
+                picked.Add(i);
+            }
             Refresh();
         }
 

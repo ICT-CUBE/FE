@@ -131,13 +131,18 @@ namespace ARZone
 
             if (CameraScreens.Contains(id) && !session.IsRunning) session.StartSession();
 
+            // AR 소환(아바타 홈)으로 들어온 구간에서는 무대를 놓지도, 보여주지도 않는다 (유저 지시 2026-08-18).
+            // 스테이지 흐름은 그대로 — 이미 놓아둔 무대는 지우지 않고 감추기만 해서 돌아오면 살아 있다.
+            bool summon = IsSummonScreen(id);
+
             switch (id)
             {
                 case ScanId:
                 case SummonScanId:
                     session.SetScanning(true);
                     session.ShowGrid(true);
-                    if (placement != null) placement.Begin(session);
+                    // 스캔 중에는 아무것도 놓지 않는다 (소환은 인식 성공 뒤부터)
+                    if (placement != null && !summon) placement.Begin(session);
                     if (scanner != null) scanner.Begin(session);
                     scanShownAt = Time.time;
                     planePending = false;
@@ -148,8 +153,16 @@ namespace ARZone
                     if (scanner != null) scanner.End();
                     session.SetScanning(true);
                     session.ShowGrid(true);
-                    if (placement != null) placement.Begin(session);
+                    // 소환 흐름은 무대가 아니라 아바타를 놓는다
+                    if (placement != null)
+                        placement.Begin(session, summon ? StagePlacementController.Target.Avatar
+                                                       : StagePlacementController.Target.Stage);
                     SetActive(hintChip, true);
+                    break;
+
+                case SummonId:
+                    // 촬영 화면에선 더 이상 따라다니지 않는다 (아바타는 그 자리에 남는다)
+                    if (placement != null) placement.End();
                     break;
 
                 case StageId:
@@ -157,12 +170,19 @@ namespace ARZone
                     session.ConfirmPlacement();
                     break;
             }
+
+            session.ShowStage(!summon);
+            session.ShowAvatar(summon);
         }
 
         // 지금 열려 있는 스캔 화면 → 그 짝이 되는 인식 성공 화면
         static string PlaceFor(string scanId) => scanId == SummonScanId ? SummonPlaceId : PlaceId;
 
         static bool IsScanScreen(string id) => id == ScanId || id == SummonScanId;
+
+        // AR 소환 흐름의 화면들 (무대 없이 돈다)
+        static bool IsSummonScreen(string id) =>
+            id == SummonScanId || id == SummonPlaceId || id == SummonId;
 
         void OnPlaneFound()
         {

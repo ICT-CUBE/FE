@@ -79,7 +79,13 @@ namespace ARZone
         void Play(string message, float bottom)
         {
             if (label == null) return;
-            if (box != null) box.anchoredPosition = new Vector2(0, bottom);
+            if (box != null)
+            {
+                box.anchoredPosition = new Vector2(0, bottom);
+                // 토스트는 Awake 에 만들어져 형제 순서가 앞이라, 뒤에 오는 시트·모달에 가린다.
+                // (사진 선택 시트 위에 떠야 하는 '최대 5장' 안내가 안 보였다)
+                box.SetAsLastSibling();
+            }
             label.text = message;
             if (running != null) StopCoroutine(running);
             running = StartCoroutine(Fade());

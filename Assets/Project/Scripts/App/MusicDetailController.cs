@@ -17,11 +17,16 @@ namespace ARZone
             public AudioClip clip;
             public string clipKey;               // Resources/Audio/<clipKey>.mp3
 
+            // 서버 스트리밍 음원 (2026-08-26 전환). 도착하면 로컬보다 우선한다 —
+            // sameClip 비교(audioSrc.clip == t.Clip)가 교체 후에도 성립해야 해서 여기 둔다.
+            [System.NonSerialized] public AudioClip serverClip;
+
             AudioClip cached; bool tried;
             public AudioClip Clip
             {
                 get
                 {
+                    if (serverClip != null) return serverClip;
                     if (clip != null) return clip;
                     if (!tried) { tried = true; if (!string.IsNullOrEmpty(clipKey)) cached = Resources.Load<AudioClip>("Audio/" + clipKey); }
                     return cached;
@@ -90,9 +95,11 @@ namespace ARZone
 
         void Awake()
         {
-            audioSrc = GetComponent<AudioSource>();
-            if (audioSrc == null) audioSrc = gameObject.AddComponent<AudioSource>();
-            audioSrc.playOnAwake = false;
+            // ★ AudioSource 를 이 화면에 두면 안 된다. ScreenManager 가 화면을
+            //   SetActive(false) 로 끄는데, 유니티는 GameObject 가 꺼지면 AudioSource 재생을
+            //   멈춘다 → '가사 보기' 로 넘어가는 순간 노래가 끊겼다.
+            //   화면 밖에서 사는 MusicPlayer 의 것을 빌려 쓴다.
+            audioSrc = MusicPlayer.EnsureInstance().Source;
         }
 
         void OnEnable()
@@ -132,7 +139,9 @@ namespace ARZone
             Unhook(btnPlayPause); Unhook(btnPrev); Unhook(btnNext);
             Unhook(btnNextCard); Unhook(btnLyrics); Unhook(btnSegNormal); Unhook(btnSegAR);
             if (seekBar != null) seekBar.Seeked -= SeekTo;
-            if (audioSrc != null) audioSrc.Pause();
+            // ★ 여기서 멈추지 않는다. 가사 보기로 넘어가도 노래가 이어져야 한다.
+            //   (AudioSource 는 이제 이 화면이 아니라 MusicPlayer 가 소유한다.)
+            //   AR 감상으로 갈 때는 ARListenController 가 자기 쪽에서 이 재생을 멈춘다.
         }
 
         void Bind()
@@ -146,8 +155,25 @@ namespace ARZone
             if (labelNextTitle != null)
                 labelNextTitle.text = tracks[(index + 1) % tracks.Count].title;
 
+            // 가사 화면이 제목을 보여주려면 지금 무슨 곡인지 알아야 한다.
+            MusicPlayer.EnsureInstance().SetTrack(t.title, t.artist);
+
             if (audioSrc != null)
             {
+                // 같은 곡이면 재생 위치를 건드리지 않는다 — 가사 보기를 들렀다 돌아왔을 때
+                // 곡이 처음으로 되감기면 안 된다.
+                bool sameClip = audioSrc.clip == t.Clip && t.Clip != null;
+                if (sameClip && PendingTime < 0f && !autoPlayNext)
+                {
+                    wasPlaying = audioSrc.isPlaying;
+                    pausedByUser = false;
+                    Apply(audioSrc.clip.length > 0.01f ? audioSrc.time / audioSrc.clip.length : 0f);
+                    return;
+                }
+                // 곡이 바뀐다 — 이전 곡의 일반 감상 세션을 마감한다 (열려 있을 때만)
+                if (audioSrc.clip != null)
+                    ApiMediaSource.EndTrack(special: false, audioSrc.time, audioSrc.time);
+
                 audioSrc.clip = t.Clip;
                 // AR 감상에서 돌아온 경우 그 위치에서 이어 재생한다
                 if (PendingTime >= 0f && audioSrc.clip != null)
@@ -160,11 +186,34 @@ namespace ARZone
 
                 // 자동으로 넘어온 곡은 이어서 재생한다
                 if (autoPlayNext && audioSrc.clip != null) audioSrc.Play();
+
+                // 서버 스트리밍 (2026-08-26 전환) — 로컬로 먼저 틀고, 서버 음원이
+                // 도착하면 같은 위치에서 갈아끼운다. 실패하면 로컬 그대로 (로그만).
+                RequestServerAudio(t);
             }
             autoPlayNext = false;
             pausedByUser = false;
             wasPlaying = audioSrc != null && audioSrc.isPlaying;
             Apply(0f);
+        }
+
+        // 서버 음원을 요청하고, 도착 시 지금도 같은 곡이면 재생 위치를 지킨 채 갈아끼운다.
+        void RequestServerAudio(Track t)
+        {
+            if (t == null || string.IsNullOrEmpty(t.clipKey) || t.serverClip != null) return;
+            ApiMediaSource.GetTrackAudio(t.clipKey, clip =>
+            {
+                if (clip == null) return;                                  // 실패 → 로컬 유지
+                t.serverClip = clip;
+                if (audioSrc == null || audioSrc.clip == clip) return;
+                if (index >= tracks.Count || tracks[index] != t) return;   // 그새 곡이 바뀜
+                float at = audioSrc.time;
+                bool playing = audioSrc.isPlaying;
+                audioSrc.clip = clip;
+                audioSrc.time = Mathf.Clamp(at, 0f, clip.length - 0.05f);
+                if (playing) audioSrc.Play();
+                Debug.Log($"[Media] '{t.clipKey}' 서버 음원으로 전환 (위치 {at:0.0}s 유지)");
+            });
         }
 
         void Update()
@@ -175,6 +224,10 @@ namespace ARZone
 
             // 곡 종료 감지 — 재생 중이었는데 사용자가 멈추지도 않았는데 멈췄다면 끝난 것
             bool nowPlaying = audioSrc != null && audioSrc.isPlaying;
+
+            // 서버 트랙 세션 — 일반 감상(NORMAL). 실제로 소리가 나기 시작하면 연다 (2026-08-25 배선)
+            if (nowPlaying && ApiMediaSource.TrackNormalSessionId == 0 && tracks.Count > 0)
+                ApiMediaSource.BeginTrack(tracks[Mathf.Clamp(index, 0, tracks.Count - 1)].clipKey, special: false);
             if (wasPlaying && !nowPlaying && !pausedByUser && audioSrc != null && audioSrc.clip != null)
             {
                 autoPlayNext = true;
@@ -246,7 +299,12 @@ namespace ARZone
 
         void OpenLyrics()
         {
-            if (tracks.Count > 0) LyricsController.PendingKey = tracks[index].LyricsKey;
+            if (tracks.Count > 0)
+            {
+                LyricsController.PendingKey = tracks[index].LyricsKey;
+                // 가사 화면 제목이 씬 값('Mantra/Jennie')에 고정돼 있던 것을 여기서 채운다.
+                MusicPlayer.EnsureInstance().SetTrack(tracks[index].title, tracks[index].artist);
+            }
             if (ScreenManager.Instance != null) ScreenManager.Instance.Show("Lyrics");
         }
 
@@ -272,7 +330,11 @@ namespace ARZone
                     LyricsController.PendingKey = cur.LyricsKey;
                 }
                 PendingTime = audioSrc != null ? audioSrc.time : 0f;
-                PendingPlaying = audioSrc != null && audioSrc.isPlaying;
+                // 모드 변경 = 기존 세션 취소 + 새 세션 (2026-08-28 백엔드 정책).
+                // 재생도 이어붙이지 않는다 — 멈춘 채로 넘어가고 유저가 다시 플레이를 누른다.
+                PendingPlaying = false;
+                if (audioSrc != null)
+                    ApiMediaSource.EndTrack(special: false, audioSrc.time, audioSrc.time, cancelled: true);
                 ScreenManager.Instance.Show(arScreen);
             }
         }

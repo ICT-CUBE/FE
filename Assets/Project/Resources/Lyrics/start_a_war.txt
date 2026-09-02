@@ -1,50 +1,49 @@
 # start a war — 가사 싱크 파일 (LRC 형식)
 # 타임스탬프 [분:초.centi] 를 각 줄 앞에 붙이면 싱크됩니다. 지금은 가사만 있습니다.
 # 원본: 가사 모음.docx (2026-08-08)
-
-You know for me, there's no breakin' point
-Yeah, I'ma be here through all that noise
-I'm gon' protect what's mine only
-You know the role you're playin'
-I'm not sayin' we ain't got problems
-Know that we could both be on one
-But if somebody try to start some
-I'm gon' try for you
-I'll fight for you, go off for you
-I'll start a war
-Ever since the day we locked in
-I was gonna be a down bitch
-If I need to start a war
-I'm gon' try for you
-I'll fight for you, go off for you
-I'll start a war
-Yeah, yeah, yeah
-'Cause love, it hold responsibility
-Hold you down, you hold me down
-That's just how we been rollin'
-Feelin' like that first hit that you take in the mornin'
-Baby, you a token
-And I think I've grown 'til somebody comes for you
-I could bring the heat if I needed to (to)
-It ain't like I'll do it, but you know I'ma prove it
-Oh, if I need to do anything for you
-I'm not sayin' we ain't got problems
-Know that we could both be on one
-But if somebody try to start some
-I'm gon' try for you
-I'll fight for you, go off for you
-I'll start a war
-Ever since the day we locked in
-I was gonna be a down bitch
-If I need to start a war
-I'm gon' try for you
-I'll fight for you, go off for you
-I'll start a war
-Yeah, yeah
-You know I'll start a war
-Yeah, yeah
-You know I'll start a war
-Yeah
-You know I'll start a war
-Yeah, yeah
-You know I'll start a war
+[00:05.35]You know for me, there's no breakin' point
+[00:09.17]Yeah, I'ma be here through all that noise
+[00:12.88]I'm gon' protect what's mine only
+[00:16.44]You know the role you're playin'
+[00:19.18]I'm not sayin' we ain't got problems
+[00:22.89]Know that we could both be on one
+[00:26.81]But if somebody try to start some
+[00:30.56]I'm gon' try for you
+[00:32.14]I'll fight for you, go off for you
+[00:33.48]I'll start a war
+[00:34.30]Ever since the day we locked in
+[00:38.12]I was gonna be a down bitch
+[00:41.88]If I need to start a war
+[00:46.50]I'm gon' try for you
+[00:47.26]I'll fight for you, go off for you
+[00:48.35]I'll start a war
+[00:50.86]Yeah, yeah, yeah
+[00:58.00]'Cause love, it hold responsibility
+[01:01.81]Hold you down, you hold me down
+[01:03.41]That's just how we been rollin'
+[01:05.54]Feelin' like that first hit that you take in the mornin'
+[01:09.42]Baby, you a token
+[01:11.69]And I think I've grown 'til somebody comes for you
+[01:15.97]I could bring the heat if I needed to (to)
+[01:19.67]It ain't like I'll do it, but you know I'ma prove it
+[01:23.64]Oh, if I need to do anything for you
+[01:27.37]I'm not sayin' we ain't got problems
+[01:30.90]Know that we could both be on one
+[01:34.80]But if somebody try to start some
+[01:38.51]I'm gon' try for you
+[01:40.22]I'll fight for you, go off for you
+[01:41.42]I'll start a war
+[01:42.44]Ever since the day we locked in
+[01:46.07]I was gonna be a down bitch
+[01:49.90]If I need to start a war
+[01:53.91]I'm gon' try for you
+[01:55.18]I'll fight for you, go off for you
+[01:56.72]I'll start a war
+[01:58.98]Yeah, yeah
+[02:03.17]You know I'll start a war
+[02:06.39]Yeah, yeah
+[02:10.59]You know I'll start a war
+[02:15.88]Yeah
+[02:18.27]You know I'll start a war
+[02:21.63]Yeah, yeah
+[02:25.76]You know I'll start a war

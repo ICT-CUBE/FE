@@ -117,6 +117,7 @@ namespace ARZone
             var f = detailBox.gameObject.AddComponent<TMP_InputField>();
             f.textViewport = art;
             f.textComponent = tt;
+            InputFieldTuner.Tune(f);   // ⚠ textComponent 배선 뒤에 불러야 캐럿(|)이 생긴다
             f.placeholder = detailHint;
             f.lineType = TMP_InputField.LineType.MultiLineNewline;
             f.characterLimit = charLimit;
@@ -129,13 +130,34 @@ namespace ARZone
             if (detailCount != null) detailCount.text = (v != null ? v.Length : 0) + " / " + charLimit;
         }
 
+        // 신고 대상 메시지 id — 대화 화면이 시트를 열 때 채운다
+        public static int PendingMessageId;
+
+        // 화면 라벨 → 서버 enum. 라벨 문구가 바뀌어도 키워드로 잡히게 한다.
+        static string ToServerReason(string label)
+        {
+            if (!string.IsNullOrEmpty(label))
+            {
+                if (label.Contains("페르소나") || label.Contains("말투")) return "INCORRECT_PERSONA";
+                if (label.Contains("사실") || label.Contains("환각") || label.Contains("잘못")) return "HALLUCINATION";
+            }
+            return "INAPPROPRIATE_EXPRESSION";
+        }
+
         // 시안엔 미선택 상태의 안내가 없다 → 사유를 안 고르면 아무 일도 일어나지 않는다.
         void Submit()
         {
             if (picked < 0) return;
-            string reason = picked < optBg.Length && optBg[picked] != null
+            string label = picked < optBg.Length && optBg[picked] != null
                 ? ReasonText(picked) : picked.ToString();
-            Debug.Log($"[Report] 사유={reason} / 상세=\"{(detail != null ? detail.text : "")}\" — 전송할 백엔드 미연결");
+
+            // 서버 전송 (2026-08-25 배선) — POST …/conversation-messages/{id}/reports
+            if (ConversationStore.Instance != null && PendingMessageId > 0)
+                ConversationStore.Instance.ReportMessage(PendingMessageId, ToServerReason(label),
+                                                         detail != null ? detail.text : "");
+            else
+                Debug.LogWarning($"[Report] 신고 대상 메시지 id 가 없다 (사유={label})");
+            PendingMessageId = 0;
             Close();
         }
 

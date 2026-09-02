@@ -1,42 +1,41 @@
 # Seoul City — 가사 싱크 파일 (LRC 형식)
 # 타임스탬프 [분:초.centi] 를 각 줄 앞에 붙이면 싱크됩니다. 지금은 가사만 있습니다.
 # 원본: 가사 모음.docx (2026-08-08)
-
-Ooh
-Ooh
-Ooh
-(Mike WiLL Made-It)
-Give me hug, need your love, touch my thigh
-Tell me what puts you in that mind
-Frame it up, draw me in, do me right
-Don't you dare leave my sight
-I could be, be your prize, pick me up
-Flying lights, paradise
-In Seoul city
-I see your soul
-Seoul city
-I see your soul
-Yeah, yeah
-Hey, ayy, hey
-+82, some miracle
-Only listen to my general, whoa
-He says my attitude out of control
-Tell me what to do, Mr. General
-Oh-oh
-Would you make me your boss, pretty please?
-Pretty please, let me ease your mind
-Look at me, can you breathe? (Ah, ah)
-I could give you life
-Apple of, of my eye, pick me up
-Flying lights, paradise
-In Seoul city
-I see your soul
-Seoul city
-I see your soul
-Yeah, yeah
-Hey, ayy, hey
-+82, some miracle
-Only listen to my general, whoa
-He says my attitude out of control
-Tell me what to do, Mr. General
-Oh-oh
+[00:03.30]Ooh
+[00:06.46]Ooh
+[00:09.35]Ooh
+[00:11.27](Mike WiLL Made-It)
+[00:12.86]Give me hug, need your love, touch my thigh
+[00:16.20]Tell me what puts you in that mind
+[00:19.23]Frame it up, draw me in, do me right
+[00:22.76]Don't you dare leave my sight
+[00:25.56]I could be, be your prize, pick me up
+[00:29.02]Flying lights, paradise
+[00:31.29]In Seoul city
+[00:34.17]I see your soul
+[00:37.22]Seoul city
+[00:40.40]I see your soul
+[00:43.87]Yeah, yeah
+[00:47.28]Hey, ayy, hey
+[00:50.71]+82, some miracle
+[00:54.18]Only listen to my general, whoa
+[01:02.57]He says my attitude out of control
+[01:06.65]Tell me what to do, Mr. General
+[01:10.93]Oh-oh
+[01:15.66]Would you make me your boss, pretty please?
+[01:19.15]Pretty please, let me ease your mind
+[01:22.00]Look at me, can you breathe? (Ah, ah)
+[01:26.04]I could give you life
+[01:28.20]Apple of, of my eye, pick me up
+[01:31.59]Flying lights, paradise
+[01:33.99]In Seoul city
+[01:37.50]I see your soul
+[01:39.92]Seoul city
+[01:43.11]I see your soul
+[01:46.22]Yeah, yeah
+[01:50.07]Hey, ayy, hey
+[01:53.53]+82, some miracle
+[01:56.85]Only listen to my general, whoa
+[02:05.28]He says my attitude out of control
+[02:09.40]Tell me what to do, Mr. General
+[02:14.09]Oh-oh

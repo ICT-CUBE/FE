@@ -33,5 +33,5 @@ namespace ARZone
     }
 
     // 시안에는 '최신순' 하나뿐이다. 드롭다운이 열린 시안이 없어 다른 항목을 지어내지 않는다.
-    public enum CommunitySort { Latest }
+    public enum CommunitySort { Latest, Oldest }   // 최신순 · 오래된순 (2026-08-31 정렬 토글)
 }

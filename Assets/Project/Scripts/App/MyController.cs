@@ -98,6 +98,9 @@ namespace ARZone
         void ConfirmLogout()
         {
             CloseModal(modalLogout);
+            // 토큰을 지워야 한다 — 남겨두면 자동 로그인(LoginModeSwitcher)이
+            // 로그인 화면을 즉시 건너뛰어 로그아웃이 안 된 것처럼 보인다 (2026-08-31)
+            ApiConfig.SaveToken("");
             ScreenManager.Instance?.Show("Login");
         }
 
@@ -107,6 +110,7 @@ namespace ARZone
             // 탈퇴하면 계정이 없어지므로 가입 이력도 지운다 — 그래야 Login 화면의 이메일 버튼이
             // LoginModeSwitcher 에 의해 '이메일로 회원가입'(→EmailSignup)으로 되돌아간다.
             LoginModeSwitcher.HasSignedUp = false;
+            ApiConfig.SaveToken("");   // 탈퇴도 토큰 제거 — 자동 로그인 차단
             ScreenManager.Instance?.Show("Login");
 
             // 시안 '마이 토스트 모음.svg' 문구 그대로. bottom=188 은 그 시안에서 실측한 값

@@ -9,7 +9,8 @@ namespace ARZone
     // 시안: (20,789) 372x46, #181A20 + #242831 테두리, 가운데 글자.
     //
     // UI 는 런타임에 만든다(씬에 미리 둘 필요 없음).
-    // 쓰는 쪽: Toast.Show("✨ JENNIE 친밀도 5P 획득!");
+    // 쓰는 쪽: Toast.Show("JENNIE 친밀도 5P 획득!");
+    // ⚠ 이모지 금지 — Pretendard 에 글리프가 없어 네모로 깨진다 (✨ 실기 확인, 2026-08-26)
     public class Toast : MonoBehaviour
     {
         [SerializeField] Sprite background;   // bg_round8 등 9-slice

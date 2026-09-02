@@ -27,7 +27,7 @@ namespace ARZone
 
         // 이모지(☕️🎵⭐️)는 Pretendard 에 글리프가 없다. 아이콘 스프라이트를 주면 그걸 쓰고,
         // 없으면 제목 텍스트 그대로 둔다(그 경우 이모지는 □ 로 보인다).
-        static string StripEmoji(string s)
+        public static string StripEmoji(string s)
         {
             if (string.IsNullOrEmpty(s)) return s;
             var sb = new System.Text.StringBuilder();
@@ -53,6 +53,7 @@ namespace ARZone
                 UiUtil.Place(card, i * (cardW + gap), 0f, cardW, 97f);
 
                 var bg = UiUtil.MakeImage(card, "Bg", cardSprite, DesignTokens.Bg.Base, Image.Type.Sliced, true);
+                GlassEdgeGlow.Attach(card, GlassGlowBoot.Round12);             // 빛나는 부분 테두리
                 var brt = (RectTransform)bg.transform;
                 brt.anchorMin = Vector2.zero; brt.anchorMax = Vector2.one;
                 brt.offsetMin = Vector2.zero; brt.offsetMax = Vector2.zero;

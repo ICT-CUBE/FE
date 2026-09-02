@@ -25,6 +25,10 @@ namespace ARZone
         [SerializeField] Image tabConcertBg;
         [SerializeField] Color tabOn = Color.white;
         [SerializeField] Color tabOff = new Color(1f, 1f, 1f, 0.08f);
+        // 탭은 색이 아니라 스프라이트가 상태를 표현한다 (tab_pill_on=보라 / tab_pill_off=어두움).
+        // 색만 바꾸던 예전 방식은 콘서트 선택 시 보라 알약이 사라졌다 (2026-08-31 실기).
+        [SerializeField] Sprite pillOn;
+        [SerializeField] Sprite pillOff;
 
         [SerializeField] string detailScreen = "StageDetail";
 
@@ -35,6 +39,12 @@ namespace ARZone
             if (tabMV != null) tabMV.onClick.AddListener(ShowMV);
             if (tabConcert != null) tabConcert.onClick.AddListener(ShowConcert);
             if (featuredCard != null) featuredCard.onClick.AddListener(OpenFeatured);
+            // 2026-08-30: 목록을 서버(썸네일·제목·설명·연도)로 채운다. 실패하면 로컬 그대로.
+            if (StageCatalog.Instance != null)
+            {
+                StageCatalog.Instance.OnChanged += Refresh;
+                StageCatalog.Instance.LoadFromServer();
+            }
             Refresh();
         }
 
@@ -43,6 +53,7 @@ namespace ARZone
             if (tabMV != null) tabMV.onClick.RemoveListener(ShowMV);
             if (tabConcert != null) tabConcert.onClick.RemoveListener(ShowConcert);
             if (featuredCard != null) featuredCard.onClick.RemoveListener(OpenFeatured);
+            if (StageCatalog.Instance != null) StageCatalog.Instance.OnChanged -= Refresh;
         }
 
         void ShowMV() { current = StageCategory.MusicVideo; Refresh(); }
@@ -56,8 +67,17 @@ namespace ARZone
                 return;
             }
 
-            if (tabMVBg != null) tabMVBg.color = current == StageCategory.MusicVideo ? tabOn : tabOff;
-            if (tabConcertBg != null) tabConcertBg.color = current == StageCategory.Concert ? tabOn : tabOff;
+            bool mv = current == StageCategory.MusicVideo;
+            if (pillOn != null && pillOff != null)
+            {
+                if (tabMVBg != null) { tabMVBg.sprite = mv ? pillOn : pillOff; tabMVBg.color = Color.white; }
+                if (tabConcertBg != null) { tabConcertBg.sprite = mv ? pillOff : pillOn; tabConcertBg.color = Color.white; }
+            }
+            else
+            {
+                if (tabMVBg != null) tabMVBg.color = mv ? tabOn : tabOff;
+                if (tabConcertBg != null) tabConcertBg.color = mv ? tabOff : tabOn;
+            }
 
             var list = StageCatalog.Instance.Filter(current);
 
@@ -69,7 +89,12 @@ namespace ARZone
             if (top != null)
             {
                 if (featuredThumb != null && top.thumb != null) featuredThumb.sprite = top.thumb;
-                if (featuredTitle != null) featuredTitle.text = top.title;
+                if (featuredTitle != null)
+                {
+                    featuredTitle.text = top.title;
+                    featuredTitle.textWrappingMode = TextWrappingModes.NoWrap;
+                    featuredTitle.overflowMode = TextOverflowModes.Ellipsis;
+                }
                 if (featuredSub != null) featuredSub.text = top.sub;
             }
             if (featuredCard != null) featuredCard.gameObject.SetActive(top != null);
@@ -96,7 +121,13 @@ namespace ARZone
                 var row = Instantiate(rowPrefab, container);
                 row.SetActive(true);
 
-                Set<TMP_Text>(row, "Title", t => t.text = s.title);
+                // 2026-08-30 유저 지시: 긴 제목도 한 줄 + 말줄임 (두 줄로 감기지 않게)
+                Set<TMP_Text>(row, "Title", t =>
+                {
+                    t.text = s.title;
+                    t.textWrappingMode = TextWrappingModes.NoWrap;
+                    t.overflowMode = TextOverflowModes.Ellipsis;
+                });
                 Set<TMP_Text>(row, "Desc", t => t.text = s.sub);
                 Set<TMP_Text>(row, "Date", t => t.text = s.date);
                 if (s.thumb != null) Set<Image>(row, "Thumb", i => i.sprite = s.thumb);

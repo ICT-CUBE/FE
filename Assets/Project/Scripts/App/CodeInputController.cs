@@ -20,7 +20,8 @@ namespace ARZone
         [SerializeField] string failScreen = "CodeFail";
 
         [Header("임시 — 서버 붙기 전까지")]
-        [SerializeField] string expectedCode = "9999";
+        [SerializeField] string expectedCode = "9999";   // (서버 배선 후 미사용 — 씬 값 보존용으로만 남긴다)
+        [SerializeField] int cubeId = 1;                  // 데모 시드. 큐브 스캔이 식별하면 그 값으로
 
         readonly StringBuilder buf = new StringBuilder();
         float remain;
@@ -112,8 +113,23 @@ namespace ARZone
         void Submit()
         {
             finished = true;
-            if (buf.ToString() == expectedCode) Done(successScreen, "성공");
-            else Done(failScreen, "실패");
+            // 서버 인증 (2026-08-25 배선) — POST /cubes/verification {cubeId, ownershipCode}
+            // 예전엔 expectedCode 로컬 비교였다. cubeId 는 큐브 스캔이 식별해줄 값인데
+            // 지금은 그 연결이 없어 데모 시드(1)를 쓴다. ⚠ 시드 큐브 1은 이미 소유 상태라
+            // 서버가 409(CUBE_NOT_REGISTRABLE)를 준다 — 미소유 시드가 생겨야 성공 경로를 밟는다.
+            var req = new CubeVerifyReq { cubeId = cubeId, ownershipCode = buf.ToString() };
+            ApiClient.Post("api/v1/cubes/verification", JsonUtility.ToJson(req),
+                json =>
+                {
+                    try
+                    {
+                        var res = JsonUtility.FromJson<CubeVerifyRes>(json);
+                        Debug.Log($"[코드] 서버 인증 성공 — cubeOwnershipId={res.cubeOwnershipId}");
+                    }
+                    catch (System.Exception) { }
+                    Done(successScreen, "성공");
+                },
+                err => Done(failScreen, $"실패({err})"));
         }
 
         void Fail() => Done(failScreen, "시간 초과");

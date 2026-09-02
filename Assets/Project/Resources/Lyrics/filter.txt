@@ -1,42 +1,41 @@
 # Filter — 가사 싱크 파일 (LRC 형식)
 # 타임스탬프 [분:초.centi] 를 각 줄 앞에 붙이면 싱크됩니다. 지금은 가사만 있습니다.
 # 원본: 가사 모음.docx (2026-08-08)
-
-Incomin' (la-la-la-la)
-I woke up like this, feelin' like a weight just lifted
-I don't know what it is, but I swear to God I love this shit
-Look in the mirror, there ain't nothin' clearer
-So take off your filter, bitch
-What you gon' do with that? (Yeah, yeah)
-Anything I want is in my reach, yeah, I like that (yeah)
-Unapologetic when I creep, yeah, it's like that (yeah)
-All the flashing lights, they follow me, yeah, I like that
-(Yeah-yeah, yeah-yeah-yeah, yeah)
-Full throttle crashin' through the gate when I ride out (yeah)
-Quick to judge a book by the front, inside out (yeah)
-Never cared what you thought then, why should I now? (Yeah)
-(Yeah-yeah, yeah-yeah-yeah, yeah)
-Undress me on the way to perfection, yeah
-Underneath, finally found what's been missin'
-When I take it off
-I know I love me more
-With no filter, filter, oh
-With no filter, filter, oh
-With no filter, uncensored
-When I take it all off, I love me more
-With no filter (la-la-la-la)
-I found it under it all
-Simple and so beautiful
-Go 'head and judge me
-Nothin' can touch me when I take it off
-Undress me (undress me) on the way to perfection, yeah
-Underneath (underneath), finally found what's been missin'
-When I take it off
-I know I love me more
-With no filter (oh)
-(Filter) oh, with no filter (filter)
-With no filter, filter (oh)
-With no filter, filter
-Oh, with no filter, uncensored
-When I take it all off, I love me more
-With no filter
+[00:11.29]Incomin' (la-la-la-la)
+[00:15.88]I woke up like this, feelin' like a weight just lifted
+[00:19.96]I don't know what it is, but I swear to God I love this shit
+[00:23.53]Look in the mirror, there ain't nothin' clearer
+[00:26.95]So take off your filter, bitch
+[00:29.25]What you gon' do with that? (Yeah, yeah)
+[00:31.17]Anything I want is in my reach, yeah, I like that (yeah)
+[00:33.63]Unapologetic when I creep, yeah, it's like that (yeah)
+[00:36.04]All the flashing lights, they follow me, yeah, I like that
+[00:38.53](Yeah-yeah, yeah-yeah-yeah, yeah)
+[00:41.44]Full throttle crashin' through the gate when I ride out (yeah)
+[00:43.78]Quick to judge a book by the front, inside out (yeah)
+[00:46.30]Never cared what you thought then, why should I now? (Yeah)
+[00:48.81](Yeah-yeah, yeah-yeah-yeah, yeah)
+[00:51.88]Undress me on the way to perfection, yeah
+[00:55.54]Underneath, finally found what's been missin'
+[00:59.12]When I take it off
+[01:02.30]I know I love me more
+[01:06.68]With no filter, filter, oh
+[01:10.04]With no filter, filter, oh
+[01:14.41]With no filter, uncensored
+[01:16.47]When I take it all off, I love me more
+[01:21.87]With no filter (la-la-la-la)
+[01:24.11]I found it under it all
+[01:28.17]Simple and so beautiful
+[01:32.19]Go 'head and judge me
+[01:33.75]Nothin' can touch me when I take it off
+[01:37.99]Undress me (undress me) on the way to perfection, yeah
+[01:41.76]Underneath (underneath), finally found what's been missin'
+[01:45.27]When I take it off
+[01:48.54]I know I love me more
+[01:54.48]With no filter (oh)
+[02:03.02](Filter) oh, with no filter (filter)
+[02:10.04]With no filter, filter (oh)
+[02:13.88]With no filter, filter
+[02:16.61]Oh, with no filter, uncensored
+[02:19.88]When I take it all off, I love me more
+[02:25.29]With no filter

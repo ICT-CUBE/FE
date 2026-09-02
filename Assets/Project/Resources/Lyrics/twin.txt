@@ -1,42 +1,41 @@
 # twin — 가사 싱크 파일 (LRC 형식)
 # 타임스탬프 [분:초.centi] 를 각 줄 앞에 붙이면 싱크됩니다. 지금은 가사만 있습니다.
 # 원본: 가사 모음.docx (2026-08-08)
-
-It's like I'm writing a letter
-And I put in a twelve-ounce bottle of Heineken
-In the Atlantic on a whim
-'Cause I know I've been gone too long
-But I'm writing a song
-It's like I'm writing a letter, but I'm writing a song
-It's like I'm writing a letter, but I'm writing a song
-It's like I'm writing a letter, but I'm writing a song
-Can you just bear with me? We were ten years in
-And young and dumb and innocent, my friend
-But I knew all along that we were both wrong
-It's like I'm writing a letter, but I'm writing a song
-It's like I'm writing a letter, but I'm writing a song
-It's like I'm writing a letter, but I'm writing a song
-I didn't leave ya, I still see ya
-When I'm bumping Ashanti, yeah, on a beach, yeah
-I didn't hold ya, but I still know ya
-We will make up, make things right when we get older, friend
-Twin, twin, twin
-You and I, we drifted apart
-Twin, twin, twin
-Like the white clouds under the stars
-Do you feel a way?
-I blamed the timing, wasn't timing
-We was fighting and colliding, man, I just couldn't stay
-And I keep your name so, so, so tightly to my heartbeat
-Guess I lost you and you lost me, but I put fuel to your flame
-I didn't leave ya, I still see ya
-When I'm bumping Ashanti, yeah, on a beach, yeah
-I didn't hold ya, but I still know ya
-We will make up, make things right when we get older, friend
-Twin, twin, twin
-You and I, we drifted apart
-Twin, twin, twin
-Like the white clouds under the stars
-Twin, twin, twin
-You and I, we drifted apart
-Twin, twin, twin
+[00:21.98]It's like I'm writing a letter
+[00:24.48]And I put in a twelve-ounce bottle of Heineken
+[00:28.21]In the Atlantic on a whim
+[00:30.52]'Cause I know I've been gone too long
+[00:33.59]But I'm writing a song
+[00:34.88]It's like I'm writing a letter, but I'm writing a song
+[00:37.66]It's like I'm writing a letter, but I'm writing a song
+[00:40.53]It's like I'm writing a letter, but I'm writing a song
+[00:44.95]Can you just bear with me? We were ten years in
+[00:48.37]And young and dumb and innocent, my friend
+[00:51.71]But I knew all along that we were both wrong
+[00:54.78]It's like I'm writing a letter, but I'm writing a song
+[00:57.31]It's like I'm writing a letter, but I'm writing a song
+[01:00.23]It's like I'm writing a letter, but I'm writing a song
+[01:07.67]I didn't leave ya, I still see ya
+[01:13.23]When I'm bumping Ashanti, yeah, on a beach, yeah
+[01:19.04]I didn't hold ya, but I still know ya
+[01:24.68]We will make up, make things right when we get older, friend
+[01:33.08]Twin, twin, twin
+[01:39.35]You and I, we drifted apart
+[01:44.32]Twin, twin, twin
+[01:50.89]Like the white clouds under the stars
+[01:54.64]Do you feel a way?
+[01:56.60]I blamed the timing, wasn't timing
+[01:59.67]We was fighting and colliding, man, I just couldn't stay
+[02:05.76]And I keep your name so, so, so tightly to my heartbeat
+[02:11.30]Guess I lost you and you lost me, but I put fuel to your flame
+[02:17.08]I didn't leave ya, I still see ya
+[02:22.49]When I'm bumping Ashanti, yeah, on a beach, yeah
+[02:28.17]I didn't hold ya, but I still know ya
+[02:33.66]We will make up, make things right when we get older, friend
+[02:42.08]Twin, twin, twin
+[02:48.64]You and I, we drifted apart
+[02:53.30]Twin, twin, twin
+[02:59.89]Like the white clouds under the stars
+[03:04.86]Twin, twin, twin
+[03:11.22]You and I, we drifted apart
+[03:15.92]Twin, twin, twin

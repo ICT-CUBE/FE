@@ -42,6 +42,22 @@ namespace ARZone
 
         // Destroy 는 프레임 끝에야 실제로 지워진다. 그 사이에 Instantiate 하면 옛 행과 새 행이
         // 같은 레이아웃에 함께 잡혀 글씨가 겹쳐 보인다. 부모에서 먼저 떼어내야 즉시 빠진다.
+        // 누르는 '순간'(PointerDown)에 실행되는 버튼 배선 (2026-08-31).
+        // 키보드가 열린 채 전송을 탭하면 pointer-down 순간 입력 포커스가 풀려 키보드가 닫히고,
+        // 리프트가 풀린 버튼이 아래로 이동해 pointer-up 이 빗나가 onClick 이 무산됐다 —
+        // 그래서 전송류 버튼은 down 시점에 실행한다. 재호출해도 중복 등록되지 않는다.
+        public static void OnPointerDown(GameObject go, UnityEngine.Events.UnityAction act)
+        {
+            if (go == null || act == null) return;
+            var trig = go.GetComponent<UnityEngine.EventSystems.EventTrigger>();
+            if (trig == null) trig = go.AddComponent<UnityEngine.EventSystems.EventTrigger>();
+            trig.triggers.RemoveAll(e => e.eventID == UnityEngine.EventSystems.EventTriggerType.PointerDown);
+            var entry = new UnityEngine.EventSystems.EventTrigger.Entry
+            { eventID = UnityEngine.EventSystems.EventTriggerType.PointerDown };
+            entry.callback.AddListener(_ => act());
+            trig.triggers.Add(entry);
+        }
+
         public static void ClearChildren(Transform content)
         {
             if (content == null) return;
@@ -157,9 +173,62 @@ namespace ARZone
 
         // RawImage 는 텍스처를 무조건 늘려서 채운다(비율 유지 옵션이 없다).
         // 시안처럼 '꽉 채우고 넘치는 쪽을 잘라내기' 를 하려면 uvRect 로 중앙을 잘라야 한다.
+        // ── 사진 상세: 원본 비율 유지(contain) ──
+        // FitCover(크롭)와 달리 사진을 자르지 않고, 박스 안에 통째로 들어가게 rect 를 줄인다.
+        //
+        // ★ 켜지지 않은 화면에서도 동작해야 한다 — 갤러리는 상세 화면을 Show() 하기 '전에'
+        //   사진을 넣는데, 그때 stretch 앵커의 rect.width 는 0 이다(FitCover 가 일찍 반환해
+        //   상세가 빈 화면으로 뜨던 원인). 그래서 rect 대신 앵커+sizeDelta 로 박스를 계산한다
+        //   (캔버스 기준폭 412 는 이 프로젝트 상수 — MakeBubble 등에서 이미 쓴다).
+        //
+        // 같은 RawImage 를 FitCover 흐름(캡처 상세)과 번갈아 쓰므로, 처음 본 rect 를 기억해
+        // 두 함수 모두 그 기준에서 출발한다 — 이전 호출이 줄여놓은 rect 가 새지 않는다.
+        static readonly System.Collections.Generic.Dictionary<int, (Vector2 size, Vector2 pos)>
+            baseRects = new System.Collections.Generic.Dictionary<int, (Vector2, Vector2)>();
+
+        static (Vector2 size, Vector2 pos) EnsureBase(RawImage img)
+        {
+            int id = img.GetInstanceID();
+            if (!baseRects.TryGetValue(id, out var b))
+            {
+                b = (img.rectTransform.sizeDelta, img.rectTransform.anchoredPosition);
+                baseRects[id] = b;
+            }
+            return b;
+        }
+
+        public static void FitContain(RawImage img, Texture tex)
+        {
+            if (img == null) return;
+            var rt = img.rectTransform;
+            var (bSize, bPos) = EnsureBase(img);
+
+            img.texture = tex;
+            img.uvRect = new Rect(0f, 0f, 1f, 1f);
+            if (tex == null || tex.width <= 0 || tex.height <= 0)
+            {
+                rt.sizeDelta = bSize; rt.anchoredPosition = bPos;
+                return;
+            }
+
+            bool stretchX = rt.anchorMax.x - rt.anchorMin.x > 0.99f;
+            float boxW = stretchX ? 412f + bSize.x : bSize.x;
+            float boxH = bSize.y;
+
+            float k = Mathf.Min(boxW / tex.width, boxH / tex.height);
+            float w = tex.width * k, h = tex.height * k;
+
+            rt.sizeDelta = new Vector2(stretchX ? w - 412f : w, h);
+            // 세로는 박스 가운데에 놓는다 (pivot y=1 기준: 남는 높이의 절반만큼 내린다)
+            rt.anchoredPosition = new Vector2(bPos.x, bPos.y - (boxH - h) * 0.5f);
+        }
+
         public static void FitCover(RawImage img, Texture tex)
         {
             if (img == null) return;
+            // FitContain 이 줄여놓은 rect 가 남아 있으면 원래대로 되돌린 뒤 크롭한다
+            if (baseRects.TryGetValue(img.GetInstanceID(), out var b))
+            { img.rectTransform.sizeDelta = b.size; img.rectTransform.anchoredPosition = b.pos; }
             img.texture = tex;
             if (tex == null) { img.uvRect = new Rect(0f, 0f, 1f, 1f); return; }
 

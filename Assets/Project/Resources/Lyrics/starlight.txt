@@ -1,48 +1,47 @@
 # Starlight — 가사 싱크 파일 (LRC 형식)
 # 타임스탬프 [분:초.centi] 를 각 줄 앞에 붙이면 싱크됩니다. 지금은 가사만 있습니다.
 # 원본: 가사 모음.docx (2026-08-08)
-
-저긴 어딜까?
-저 별의 시작과 끝은 어디일까?
-나도 모르겠어
-그 사이 어딘가쯤에 있지 않을까?
-You say you see the starlight in me
-Shining so bright and pristine
-What about the moments in between?
-You said you see the starlight in me
-What about the black mystery?
-What about the moments you don't see?
-It's way deeper than what you think
-I'm tired of that Novocain
-Put all that shit away (away)
-I wanna feel everything
-I was just a white, white, white, lie, lie
-Truth comes out in time, time, time, every time
-I know where my soul has been
-Now I remember the night
-Remember the night
-Now I remember thе night
-Remember thе night
-Yeah, yeah, yeah, yeah, yeah, yeah, yeah, yeah
-Starlight bright, starlight bright, starlight bright, starlight
-Yeah, yeah, yeah, yeah, yeah, yeah, yeah, yeah
-Starlight bright, starlight bright, starlight bright, starlight
-So many after hours
-I just wanna make my mama prouder
-When the stupid thoughts started getting louder
-Said, &quot;Bitch, chill out, &quot; and took a cold shower
-Like we gon' levitate, gon' levitate
-To the 808, I gravitate to the real, not fake
-And this time, it's on me
-'Cause I remember the night
-Remember the night
-Now I remember the night
-Remember the night
-Yeah, yeah, yeah, yeah, yeah, yeah, yeah, yeah
-Starlight bright, starlight bright, starlight bright, starlight
-Yeah, yeah, yeah, yeah, yeah, yeah, yeah, yeah
-Starlight bright, starlight bright, starlight bright, starlight
-Starlight bright, starlight bright, starlight bright, starlight
-Starlight bright, starlight bright, starlight bright, starlight
-저기 반짝이는 별처럼
-내 꿈속에서 점점 가까워지는 거 아닌가?
+[00:02.08]저긴 어딜까?
+[00:04.49]저 별의 시작과 끝은 어디일까?
+[00:07.52]나도 모르겠어
+[00:09.99]그 사이 어딘가쯤에 있지 않을까?
+[00:12.38]You say you see the starlight in me
+[00:15.57]Shining so bright and pristine
+[00:18.91]What about the moments in between?
+[00:25.22]You said you see the starlight in me
+[00:28.59]What about the black mystery?
+[00:31.77]What about the moments you don't see?
+[00:36.64]It's way deeper than what you think
+[00:40.63]I'm tired of that Novocain
+[00:43.58]Put all that shit away (away)
+[00:46.91]I wanna feel everything
+[00:51.25]I was just a white, white, white, lie, lie
+[00:55.07]Truth comes out in time, time, time, every time
+[00:58.24]I know where my soul has been
+[01:03.77]Now I remember the night
+[01:07.02]Remember the night
+[01:10.19]Now I remember thе night
+[01:13.46]Remember thе night
+[01:17.49]Yeah, yeah, yeah, yeah, yeah, yeah, yeah, yeah
+[01:20.43]Starlight bright, starlight bright, starlight bright, starlight
+[01:23.87]Yeah, yeah, yeah, yeah, yeah, yeah, yeah, yeah
+[01:26.72]Starlight bright, starlight bright, starlight bright, starlight
+[01:30.12]So many after hours
+[01:33.51]I just wanna make my mama prouder
+[01:36.67]When the stupid thoughts started getting louder
+[01:39.88]Said, "Bitch, chill out, " and took a cold shower
+[01:42.71]Like we gon' levitate, gon' levitate
+[01:46.18]To the 808, I gravitate to the real, not fake
+[01:51.50]And this time, it's on me
+[01:54.94]'Cause I remember the night
+[01:57.77]Remember the night
+[02:01.29]Now I remember the night
+[02:04.57]Remember the night
+[02:08.55]Yeah, yeah, yeah, yeah, yeah, yeah, yeah, yeah
+[02:11.43]Starlight bright, starlight bright, starlight bright, starlight
+[02:14.93]Yeah, yeah, yeah, yeah, yeah, yeah, yeah, yeah
+[02:18.13]Starlight bright, starlight bright, starlight bright, starlight
+[02:24.20]Starlight bright, starlight bright, starlight bright, starlight
+[02:30.87]Starlight bright, starlight bright, starlight bright, starlight
+[02:35.93]저기 반짝이는 별처럼
+[02:39.23]내 꿈속에서 점점 가까워지는 거 아닌가?

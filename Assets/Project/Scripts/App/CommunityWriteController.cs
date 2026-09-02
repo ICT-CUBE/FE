@@ -152,6 +152,7 @@ namespace ARZone
             var field = box.gameObject.AddComponent<TMP_InputField>();
             field.textViewport = art;
             field.textComponent = tt;
+            InputFieldTuner.Tune(field);   // ⚠ textComponent 배선 뒤에 불러야 캐럿(|)이 생긴다
             field.placeholder = hint;
             field.lineType = lineType;
             if (charLimit > 0) field.characterLimit = charLimit;

@@ -83,9 +83,76 @@ namespace ARZone
             HookChip(chipCertBg, BoardCert);
         }
 
+        [Header("정렬 (2026-08-31 — 화살표 아래 = 오래된순)")]
+        [SerializeField] GameObject sortRoot;      // BtnSort (씬엔 Button 이 없어 코드로 붙인다)
+        [SerializeField] TMP_Text sortLabel;       // "최신순" / "오래된순"
+        [SerializeField] RectTransform sortArrow;  // IconSortArrow — 오래된순이면 180도 뒤집는다
+
+        void EnsureSortButton()
+        {
+            if (sortRoot == null) return;
+            var b = sortRoot.GetComponent<UnityEngine.UI.Button>();
+            if (b == null)
+            {
+                b = sortRoot.AddComponent<UnityEngine.UI.Button>();
+                b.transition = UnityEngine.UI.Selectable.Transition.None;
+                var img = sortRoot.GetComponent<UnityEngine.UI.Image>();
+                if (img != null) img.raycastTarget = true;
+            }
+            b.onClick.RemoveListener(ToggleSort);
+            b.onClick.AddListener(ToggleSort);
+            SyncSortUi();
+        }
+
+        void ToggleSort()
+        {
+            var store = CommunityStore.Instance;
+            if (store == null) return;
+            store.SetSort(store.Sort == CommunitySort.Latest ? CommunitySort.Oldest
+                                                             : CommunitySort.Latest);
+            SyncSortUi();
+        }
+
+        void SyncSortUi()
+        {
+            var store = CommunityStore.Instance;
+            bool oldest = store != null && store.Sort == CommunitySort.Oldest;
+            if (sortLabel != null)
+            {
+                // '오래된순'(4글자)이 시안 폭(45, 3글자 기준)에서 두 줄로 감겼다 —
+                // 한 줄 고정 + 글자폭에 맞춰 라벨·화살표·루트를 다시 앉힌다. 오른쪽 끝은
+                // 시안 실측(326.95+63.4=390.35)에 고정한다.
+                sortLabel.text = oldest ? "오래된순" : "최신순";
+                sortLabel.textWrappingMode = TextWrappingModes.NoWrap;
+                sortLabel.ForceMeshUpdate();
+                float w = Mathf.Ceil(sortLabel.preferredWidth);
+                var lr = sortLabel.rectTransform;
+                lr.sizeDelta = new Vector2(w, lr.sizeDelta.y);
+                float arrowW = sortArrow != null ? sortArrow.sizeDelta.x : 16.7f;
+                if (sortArrow != null)
+                {
+                    // 씬 피벗이 좌상단이라 180도 회전 시 아이콘이 왼쪽 위로 튕겨 나갔다 —
+                    // 중심 피벗으로 바꾸고 같은 자리(씬 실측 y -2.925, 라벨 오른쪽 +1.7)에 앉힌다.
+                    sortArrow.pivot = new Vector2(0.5f, 0.5f);
+                    sortArrow.anchoredPosition = new Vector2(w + 1.7f + arrowW * 0.5f,
+                                                             -2.925f - sortArrow.sizeDelta.y * 0.5f);
+                }
+                if (sortRoot != null)
+                {
+                    var rr = (RectTransform)sortRoot.transform;
+                    float total = w + 1.7f + arrowW;
+                    rr.sizeDelta = new Vector2(total, rr.sizeDelta.y);
+                    rr.anchoredPosition = new Vector2(390.35f - total, rr.anchoredPosition.y);
+                }
+            }
+            if (sortArrow != null)
+                sortArrow.localEulerAngles = new Vector3(0f, 0f, oldest ? 180f : 0f);
+        }
+
         void OnEnable()
         {
             EnsureSearchInput();
+            EnsureSortButton();
             var store = CommunityStore.Instance;
             if (store != null)
             {
@@ -195,6 +262,7 @@ namespace ARZone
             var field = searchBar.gameObject.AddComponent<TMP_InputField>();
             field.textViewport = art;
             field.textComponent = tt;
+            InputFieldTuner.Tune(field);   // ⚠ textComponent 배선 뒤에 불러야 캐럿(|)이 생긴다
             field.placeholder = searchHint;
             field.lineType = TMP_InputField.LineType.SingleLine;
             field.characterLimit = 50;

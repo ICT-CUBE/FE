@@ -1,74 +1,73 @@
 # ExtraL — 가사 싱크 파일 (LRC 형식)
 # 타임스탬프 [분:초.centi] 를 각 줄 앞에 붙이면 싱크됩니다. 지금은 가사만 있습니다.
 # 원본: 가사 모음.docx (2026-08-08)
-
-Do my, do my ladies run this, ladies run this?
-Do my, do my ladies run this, ladies run this? (Yeah)
-Do my, do my ladies run this, ladies run this? (Incoming)
-Do my, do my ladies run this, ladies run this? (Yeah, yeah, yeah, yeah)
-All of my girls looking good and they got they own money (do my, do my ladies run this?)
-Pop your shit
-This for my girls with no sponsor, they got they own fundin' (do my, do my ladies run this?)
-Not your shit
-Run through your city, that motorcade (do my, do my ladies run this?)
-Soon as I enter, they close the gate (ladies run this?)
-Presidential through your residential
-Bitch, it's nothing
-Said, &quot;Fuck your rules, &quot; is the mood, damn right
-Walk in a room and I set the vibe
-Get a pic, it'll last you long
-Whole team, they gassin' on us
-You sit too far down on 'em charts to even ask me who's in charge
-Ridin' 'round, foreign cars (yeah)
-Top down, starin' at the stars (yeah)
-Attitude, so don't start shit (yeah)
-Big moves, only extra large, yeah
-Ridin' 'round, foreign cars
-Top down, starin' at the stars (yeah)
-Attitude, so don't start shit
-Big moves, only extra large, yeah
-Wait (do my ladies run this?)
-Wait (do my ladies run this?)
-Wait (do my ladies run this?)
-Doechii (yo, yeah)
-Gimme chi, gimme purr, gimme meow, gimme her, gimme funds
-Gimme rights, gimme fight, gimme nerve, gimme cunt, let me serve, rrr
-Lemme, lemme out, lemme in
-Knock the doors down, got the keys to the Benz
-In the boardroom looking bored 'cause I'm not here for pleasin' the men
-Not here to reason with them
-Misbehaved, Miss Push-My-Pen
-I can't tame my passion for him
-Can't keep up, what happened to them? (Do my ladies run this?)
-Yeah, we lappin' the men
-Top of the food chain, bussin' a new chain
-This ain't a new thing, no, sir
-Money on stupid, hopped in a new whip
-You still on my old work (yeah, yeah)
-Work, work, this might hurt (yeah, yeah)
-I sweat hard, wet T-shirt (yeah, yeah)
-Extra large, ain't scared of the dirt (yeah, yeah)
-Hit that jackpot, now I'm
-Ridin' 'round (ridin' 'round), foreign cars (foreign cars)
-Top down (top down), starin' at the stars (yeah)
-Attitude (attitude), so don't start shit (so, don't start shit)
-Big moves, only extra large, yeah (big, big, big, big)
-Ridin' 'round (ridin' 'round), foreign cars (foreign cars)
-(Do my, do my ladies run this, ladies run this?)
-Top down (top down), starin' at the stars (yeah)
-(Do my, do my ladies run this, ladies run this?)
-Attitude (attitude), so don't start shit (so don't start shit)
-(Do my, do my ladies run this, ladies run this?)
-Big moves, only extra large, yeah (big, big, big, big)
-(Do my, do my ladies run this, ladies run this?)
-Work, work, this might hurt
-I sweat hard, wet T-shirt
-Extra large, ain't scared of the dirt (scared of the dirt), yeah, yeah
-Work, work, this might hurt
-I sweat hard, wet T-shirt (yeah, yeah)
-Extra large, ain't scared of the dirt (yeah, yeah) (scared of the dirt)
-Work, work (rrr)
-Do my, do my ladies run this, ladies run this?
-Do my, do my ladies run this, ladies run this?
-Do my, do my ladies run this, ladies run this?
-Do my, do my ladies run this, ladies run this?
+[00:02.61]Do my, do my ladies run this, ladies run this?
+[00:05.50]Do my, do my ladies run this, ladies run this? (Yeah)
+[00:09.54]Do my, do my ladies run this, ladies run this? (Incoming)
+[00:12.84]Do my, do my ladies run this, ladies run this? (Yeah, yeah, yeah, yeah)
+[00:15.78]All of my girls looking good and they got they own money (do my, do my ladies run this?)
+[00:18.36]Pop your shit
+[00:19.21]This for my girls with no sponsor, they got they own fundin' (do my, do my ladies run this?)
+[00:21.83]Not your shit
+[00:22.67]Run through your city, that motorcade (do my, do my ladies run this?)
+[00:24.49]Soon as I enter, they close the gate (ladies run this?)
+[00:26.10]Presidential through your residential
+[00:27.60]Bitch, it's nothing
+[00:28.93]Said, "Fuck your rules, " is the mood, damn right
+[00:32.25]Walk in a room and I set the vibe
+[00:35.70]Get a pic, it'll last you long
+[00:37.56]Whole team, they gassin' on us
+[00:39.25]You sit too far down on 'em charts to even ask me who's in charge
+[00:42.88]Ridin' 'round, foreign cars (yeah)
+[00:46.18]Top down, starin' at the stars (yeah)
+[00:49.61]Attitude, so don't start shit (yeah)
+[00:53.18]Big moves, only extra large, yeah
+[00:56.55]Ridin' 'round, foreign cars
+[00:59.88]Top down, starin' at the stars (yeah)
+[01:03.34]Attitude, so don't start shit
+[01:06.75]Big moves, only extra large, yeah
+[01:10.67]Wait (do my ladies run this?)
+[01:12.31]Wait (do my ladies run this?)
+[01:14.04]Wait (do my ladies run this?)
+[01:15.69]Doechii (yo, yeah)
+[01:17.54]Gimme chi, gimme purr, gimme meow, gimme her, gimme funds
+[01:20.86]Gimme rights, gimme fight, gimme nerve, gimme cunt, let me serve, rrr
+[01:24.39]Lemme, lemme out, lemme in
+[01:25.64]Knock the doors down, got the keys to the Benz
+[01:27.35]In the boardroom looking bored 'cause I'm not here for pleasin' the men
+[01:29.95]Not here to reason with them
+[01:31.24]Misbehaved, Miss Push-My-Pen
+[01:32.96]I can't tame my passion for him
+[01:34.62]Can't keep up, what happened to them? (Do my ladies run this?)
+[01:36.33]Yeah, we lappin' the men
+[01:38.08]Top of the food chain, bussin' a new chain
+[01:39.84]This ain't a new thing, no, sir
+[01:41.55]Money on stupid, hopped in a new whip
+[01:43.24]You still on my old work (yeah, yeah)
+[01:44.97]Work, work, this might hurt (yeah, yeah)
+[01:46.60]I sweat hard, wet T-shirt (yeah, yeah)
+[01:48.29]Extra large, ain't scared of the dirt (yeah, yeah)
+[01:50.01]Hit that jackpot, now I'm
+[01:51.40]Ridin' 'round (ridin' 'round), foreign cars (foreign cars)
+[01:54.76]Top down (top down), starin' at the stars (yeah)
+[01:58.18]Attitude (attitude), so don't start shit (so, don't start shit)
+[02:01.62]Big moves, only extra large, yeah (big, big, big, big)
+[02:05.12]Ridin' 'round (ridin' 'round), foreign cars (foreign cars)
+[02:06.10](Do my, do my ladies run this, ladies run this?)
+[02:08.51]Top down (top down), starin' at the stars (yeah)
+[02:09.68](Do my, do my ladies run this, ladies run this?)
+[02:11.97]Attitude (attitude), so don't start shit (so don't start shit)
+[02:13.01](Do my, do my ladies run this, ladies run this?)
+[02:15.38]Big moves, only extra large, yeah (big, big, big, big)
+[02:16.69](Do my, do my ladies run this, ladies run this?)
+[02:19.24]Work, work, this might hurt
+[02:20.89]I sweat hard, wet T-shirt
+[02:22.64]Extra large, ain't scared of the dirt (scared of the dirt), yeah, yeah
+[02:26.11]Work, work, this might hurt
+[02:27.76]I sweat hard, wet T-shirt (yeah, yeah)
+[02:29.51]Extra large, ain't scared of the dirt (yeah, yeah) (scared of the dirt)
+[02:31.69]Work, work (rrr)
+[02:33.45]Do my, do my ladies run this, ladies run this?
+[02:36.74]Do my, do my ladies run this, ladies run this?
+[02:40.19]Do my, do my ladies run this, ladies run this?
+[02:43.64]Do my, do my ladies run this, ladies run this?

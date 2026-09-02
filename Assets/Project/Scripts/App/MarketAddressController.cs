@@ -128,6 +128,7 @@ namespace ARZone
             var field = box.gameObject.AddComponent<TMP_InputField>();
             field.textViewport = art;
             field.textComponent = tt;
+            InputFieldTuner.Tune(field);   // ⚠ textComponent 배선 뒤에 불러야 캐럿(|)이 생긴다
             field.placeholder = hint;
             // 주소도 시안은 한 줄이다(잉크 높이 15.83 = 14px 한글 한 줄). 길면 가로로 밀린다.
             field.lineType = TMP_InputField.LineType.SingleLine;

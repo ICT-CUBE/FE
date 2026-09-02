@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QCARConfig>
+<Tracking>
+<ModelTarget name="avatar" motionHint="adaptive" trackingMode="car" optimizeTrackingFor="default"/>
+
+</Tracking>
+
+<Assembly name="avatars_assembly" assemblyId="80779be693a84dc39765f570dbae0879">
+<Part name="avatar" translation="0 0 0" rotation="AD: 0 0 1 0"/>
+<EntryPoint name="GuideView_0000" translation="9.36911e-07 0.039998 0.119052" rotation="AD: 1 0 0 180" trained="no">
+
+</EntryPoint>
+
+</Assembly>
+
+</QCARConfig>

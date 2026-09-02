@@ -10,18 +10,6 @@ namespace ARZone
     // 행을 왼쪽으로 밀면 삭제 버튼이 나온다(시안 '목록-1').
     public class TalkListController : MonoBehaviour
     {
-        [System.Serializable]
-        public class Session
-        {
-            public string title;
-            public string preview;
-            public string time;
-            public bool unread;
-            public bool heart;      // 미리보기 끝에 🖤 (TMP 폰트에 이모지가 없어 Image 로 붙인다)
-            public Session(string t, string p, string tm, bool u = false, bool h = false)
-            { title = t; preview = p; time = tm; unread = u; heart = h; }
-        }
-
         [Header("상단")]
         [SerializeField] Button btnNewTalk;
         [SerializeField] Button btnBack;
@@ -55,17 +43,15 @@ namespace ARZone
         [Header("이동")]
         [SerializeField] string detailScreen = "TalkDetail";
 
-        [Header("데이터 (임시 — API 오면 소스만 교체)")]
-        [SerializeField]
-        List<Session> sessions = new List<Session>
-        {
-            new Session("오늘의 무대 이야기", "오늘 무대 진짜 최고였어! 의상이랑 헤어 다 완벽...", "오후 12:25", true),
-            new Session("토론토 여행 이야기", "헐!!! 대박인데?? 나도 거기 가보고 싶었는데! 거기 @@...", "어제"),
-            new Session("첫 만남 & 앨범 콘셉트 대화", "오늘도 나 보러 와줬네? 뭐 하고 있었어?", "3일 전", false, true),
-        };
+        // 2026-08-24: 데이터 출처를 씬 더미 → ConversationStore(서버) 로 바꿨다.
+        // 시안 좌표·행 구성은 전부 그대로다.
+        static readonly List<ConvSession> Empty = new List<ConvSession>();
+        List<ConvSession> sessions =>
+            ConversationStore.Instance != null ? ConversationStore.Instance.Sessions : Empty;
 
-        // 지금 어느 대화를 여는지 — 상세 화면이 읽는다
-        public static int PendingIndex;
+        // 지금 어느 대화를 여는지 — 상세 화면이 읽는다.
+        // ★ 리스트 인덱스가 아니라 '서버 세션 id' 다. 0 이면 새 대화.
+        public static int PendingSessionId;
 
         int pendingDelete = -1;
         readonly List<GameObject> rows = new List<GameObject>();
@@ -76,6 +62,16 @@ namespace ARZone
             if (btnDeleteCancel != null) btnDeleteCancel.onClick.AddListener(CloseModal);
             if (btnDeleteConfirm != null) btnDeleteConfirm.onClick.AddListener(DoDelete);
             if (modalDelete != null) modalDelete.SetActive(false);
+
+            var store = ConversationStore.Instance;
+            if (store == null)
+            {
+                Debug.LogError("[Conv] ConversationStore 가 없다 — Canvas/ScreenManager 에 붙일 것");
+                Build();
+                return;
+            }
+            store.OnSessionsChanged += Build;
+            store.LoadSessions(ConversationType.Text);   // 이 화면은 텍스트 대화 목록이다
             Build();
         }
 
@@ -84,6 +80,7 @@ namespace ARZone
             if (btnNewTalk != null) btnNewTalk.onClick.RemoveListener(OnNew);
             if (btnDeleteCancel != null) btnDeleteCancel.onClick.RemoveListener(CloseModal);
             if (btnDeleteConfirm != null) btnDeleteConfirm.onClick.RemoveListener(DoDelete);
+            if (ConversationStore.Instance != null) ConversationStore.Instance.OnSessionsChanged -= Build;
         }
 
         void Build()
@@ -151,7 +148,11 @@ namespace ARZone
                 faceImg.type = Image.Type.Sliced;
                 faceImg.color = DesignTokens.Bg.Base;
 
-                Label(face, "Title", s.title, 36.53f, -28.67f, 260f, 20f, 16, DesignTokens.Text.Primary);
+                // ★ 서버가 conversationTitle 을 null 로 주는 경우가 있다(새로 만든 세션).
+                //   유저 결정: 지어내지 말고 그 자리를 비운다.
+                // 제목 없는 세션(방금 만든 것 — GPT 제목은 세션 종료 때 생긴다) → 자리표시
+                Label(face, "Title", string.IsNullOrWhiteSpace(s.title) ? "새 대화" : s.title,
+                      36.53f, -28.67f, 260f, 20f, 16, DesignTokens.Text.Primary);
                 Label(face, "Preview", s.preview, 36.49f, -60.95f, 280f, 18f, 13, DesignTokens.Text.Tertiary);
                 if (s.heart && heartSprite != null)
                 {
@@ -164,7 +165,7 @@ namespace ARZone
                     hrt.anchoredPosition = new Vector2(36.49f + pv.preferredWidth + 4f, -60.95f);
                     hrt.sizeDelta = new Vector2(14f, 14f);
                 }
-                Label(face, "Time", s.time, -20f, -27.68f, 100f, 16f, 13, DesignTokens.Text.Secondary, right: true);
+                Label(face, "Time", s.timeText, -20f, -27.68f, 100f, 16f, 13, DesignTokens.Text.Secondary, right: true);
 
                 if (s.unread)
                 {
@@ -240,16 +241,27 @@ namespace ARZone
 
         void Open(int i)
         {
-            PendingIndex = i;
-            // 읽었으니 안읽음 점을 지운다. 목록으로 돌아오면 OnEnable 의 Build 가 반영한다.
-            if (i >= 0 && i < sessions.Count) sessions[i].unread = false;
+            if (i < 0 || i >= sessions.Count) return;
+            PendingSessionId = sessions[i].id;
+            // 읽었으니 안읽음 점을 지운다(서버엔 이 값이 없어 지금은 항상 false 다).
+            sessions[i].unread = false;
             if (ScreenManager.Instance != null) ScreenManager.Instance.Show(detailScreen);
         }
 
         void OnNew()
         {
-            PendingIndex = -1;
-            if (ScreenManager.Instance != null) ScreenManager.Instance.Show(detailScreen);
+            var store = ConversationStore.Instance;
+            if (store == null) return;
+            // 서버에 세션을 먼저 만들고, id 를 받은 뒤에 상세로 넘어간다.
+            // 먼저 화면을 띄우면 보낼 곳(sessionId)이 없어 전송이 실패한다.
+            store.NewSession(ConversationType.Text, id =>
+            {
+                // ⚠ PendingSessionId 를 넘기지 않는다 — 서버가 '메시지 0개 세션'의 상세 조회를
+                // 404(CONVERSATION_SESSION_NOT_FOUND)로 돌려준다(2026-08-27 실측).
+                // NewSession 이 이미 CurrentSessionId 를 물고 메시지를 비워뒀으니 그대로 열면 된다.
+                PendingSessionId = 0;
+                if (ScreenManager.Instance != null) ScreenManager.Instance.Show(detailScreen);
+            });
         }
 
         // 시안 '텍스트 대화 목록-1'
@@ -269,10 +281,10 @@ namespace ARZone
 
         void DoDelete()
         {
-            if (pendingDelete >= 0 && pendingDelete < sessions.Count)
-                sessions.RemoveAt(pendingDelete);
+            var store = ConversationStore.Instance;
+            if (store != null && pendingDelete >= 0 && pendingDelete < sessions.Count)
+                store.Delete(sessions[pendingDelete].id);   // 성공하면 Store 가 OnSessionsChanged 로 알린다
             CloseModal();
-            Build();
         }
     }
 }

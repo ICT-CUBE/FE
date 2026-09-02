@@ -7,19 +7,11 @@ namespace ARZone
 {
     // 갤러리 화면. 시안(갤러리.svg)은 2열 마소너리 — 사진 비율대로 높이가 제각각이다.
     // 열 폭 178, 간격 16, 첫 행 y=176. 타일은 코드로 만든다(프리팹 불필요).
+    //
+    // 2026-08-21: 데이터 출처를 씬의 더미 목록 → GalleryStore(서버) 로 바꿨다.
+    // 좌표·색·시안 근거는 전부 그대로다. 바뀐 건 "무엇을 그리느냐" 뿐이다.
     public class GalleryController : MonoBehaviour
     {
-        public enum Category { All, Capture, Album, Concert }
-
-        [System.Serializable]
-        public class Photo
-        {
-            public Sprite image;
-            public Category category = Category.Capture;
-            public string title = "251220MMA";
-            public string date = "2025.12.20";
-        }
-
         [Header("상단")]
         [SerializeField] TMP_Text navTitle;
         [SerializeField] TMP_Text labelSelected;
@@ -29,7 +21,7 @@ namespace ARZone
 
         [Header("탭")]
         [SerializeField] RectTransform tabPill;
-        [SerializeField] TMP_Text[] tabLabels;      // 전체/캡처/앨범/콘서트 스틸컷 순
+        [SerializeField] TMP_Text[] tabLabels;      // 전체/캡처/앨범/콘서트 스틸컷 순 = GalleryCategory 순서
 
         [Header("그리드")]
         [SerializeField] ScrollRect scroll;
@@ -54,17 +46,34 @@ namespace ARZone
         [SerializeField] TMP_Text detailTitle;      // CapTitle
         [SerializeField] TMP_Text detailMeta;       // CapMeta
         [SerializeField] Button btnDetailDelete;    // Screen_CaptureDetail/BtnCapTrash
+        // AR 재경험 버튼 — 무대·트랙 캡처에서만 보인다 (앨범·콘서트 스틸컷·소환 캡처엔
+        // 서버 ar-experience 가 없다. 2026-08-30 유저 지시)
+        [SerializeField] GameObject btnReplay;      // Screen_CaptureDetail/BtnCapReplay
 
-        [Header("데이터 (임시 — 캡처는 CaptureService, 나머지는 더미)")]
-        [SerializeField] List<Photo> photos = new List<Photo>();
+        // 한 타일에 딸린 것들. 사진이 도착하면 높이가 바뀌므로 타일을 다시 만들지 않고
+        // 이 기록을 보고 자리만 다시 잡는다(20장을 매번 Destroy/Create 하지 않는다).
+        class Tile
+        {
+            public GalleryItem item;
+            public RectTransform rect;
+            public RawImage photo;
+            public Image check;
+            public float ratio = 1f;    // 높이/폭. 사진이 오기 전엔 1(정사각 자리표시자)
+        }
 
-        int detailIndex = -1;      // 상세로 연 사진
+        GalleryItem detailItem;    // 상세로 연 사진
         bool deletingDetail;       // 확인 모달이 '상세 1장 삭제' 인지
-        Category tab = Category.All;
+
+        // 캡처 상세가 '갤러리에서' 열렸는지 'AR 촬영 흐름에서' 열렸는지 구분한다.
+        // ARMediaController.OnReplayStart 가 읽어 서버 AR재경험(ar-experience)으로 무대를 고르고,
+        // AR 흐름이 상세를 열 때(OnCardClicked)는 null 로 되돌린다.
+        public static GalleryItem CurrentDetail;
+        GalleryCategory tab = GalleryCategory.All;
         bool editing;
-        readonly HashSet<int> selected = new HashSet<int>();
-        readonly List<GameObject> tiles = new List<GameObject>();
-        readonly List<Image> checks = new List<Image>();
+        readonly HashSet<string> selected = new HashSet<string>();   // ★ GalleryItem.Key (sourceType:id)
+        readonly List<Tile> tiles = new List<Tile>();
+
+        GalleryStore Store => GalleryStore.Instance;
 
         void OnEnable()
         {
@@ -73,6 +82,17 @@ namespace ARZone
             if (modalDelete != null) modalDelete.SetActive(false);
             editing = false;
             selected.Clear();
+
+            if (Store == null)
+            {
+                // 목록이 통째로 비면 어디서 끊겼는지 바로 보이게 남긴다(CommunityStore 와 같은 관례).
+                Debug.LogError("[Gallery] GalleryStore 가 없다 — Canvas/ScreenManager 에 GalleryStore 를 붙일 것");
+                Refresh();
+                return;
+            }
+
+            Store.OnChanged += Refresh;
+            Store.Load(tab);     // 갤러리에 들어올 때마다 서버 기준으로 새로 받는다
             Refresh();
         }
 
@@ -95,6 +115,7 @@ namespace ARZone
         void OnDisable()
         {
             if (btnEdit != null) btnEdit.onClick.RemoveListener(ToggleEdit);
+            if (Store != null) Store.OnChanged -= Refresh;
             HookTabs(false);
         }
 
@@ -112,16 +133,18 @@ namespace ARZone
                 if (btn.targetGraphic == null) btn.targetGraphic = tabLabels[i];
                 btn.transition = Selectable.Transition.None;
                 int idx = i;
-                if (on) btn.onClick.AddListener(() => SelectTab((Category)idx));
+                if (on) btn.onClick.AddListener(() => SelectTab((GalleryCategory)idx));
                 else btn.onClick.RemoveAllListeners();
             }
         }
 
-        void SelectTab(Category c)
+        void SelectTab(GalleryCategory c)
         {
             tab = c;
             selected.Clear();
-            Refresh();
+            // 서버가 카테고리별로 걸러 준다 — 전량을 받아 앱에서 거르지 않는다.
+            if (Store != null) Store.Load(c);
+            else Refresh();
         }
 
         // 시안: 편집 → (선택 없음) 취소 → (선택 있음) 삭제. 버튼 하나가 3역을 한다.
@@ -133,13 +156,7 @@ namespace ARZone
             Refresh();
         }
 
-        List<int> Visible()
-        {
-            var list = new List<int>();
-            for (int i = 0; i < photos.Count; i++)
-                if (tab == Category.All || photos[i].category == tab) list.Add(i);
-            return list;
-        }
+        List<GalleryItem> Visible() => Store != null ? Store.Items : new List<GalleryItem>();
 
         void Refresh()
         {
@@ -174,7 +191,7 @@ namespace ARZone
             for (int i = 0; i < tabLabels.Length; i++)
             {
                 if (tabLabels[i] == null) continue;
-                bool on = (Category)i == tab;
+                bool on = (GalleryCategory)i == tab;
                 tabLabels[i].color = on ? DesignTokens.Text.Primary : DesignTokens.Text.Tertiary;
                 if (on && tabPill != null)
                 {
@@ -193,32 +210,18 @@ namespace ARZone
         {
             if (content == null) return;
 
-            foreach (var t in tiles) if (t != null) Destroy(t);
+            foreach (var t in tiles) if (t.rect != null) Destroy(t.rect.gameObject);
             tiles.Clear();
-            checks.Clear();
 
-            var vis = Visible();
-            float[] colY = { 0f, 0f };
-
-            foreach (int pi in vis)
+            foreach (var item in Visible())
             {
-                var p = photos[pi];
-                float ratio = (p.image != null && p.image.rect.width > 0.01f)
-                    ? p.image.rect.height / p.image.rect.width : 1f;
-                float h = columnWidth * ratio;
-
-                int col = colY[0] <= colY[1] ? 0 : 1;
-                float x = col * (columnWidth + gap);
-                float y = -colY[col];
-
-                var tile = new GameObject("Tile" + pi, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+                var tile = new GameObject("Tile_" + item.Key,
+                    typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
                 tile.transform.SetParent(content, false);
                 var rt = tile.GetComponent<RectTransform>();
                 rt.anchorMin = new Vector2(0f, 1f);
                 rt.anchorMax = new Vector2(0f, 1f);
                 rt.pivot = new Vector2(0f, 1f);
-                rt.anchoredPosition = new Vector2(x, y);
-                rt.sizeDelta = new Vector2(columnWidth, h);
 
                 // 시안 타일은 r8 라운드. 유니티 UI 는 이미지를 못 둥글게 잘라서
                 // 타일에 Mask(라운드 스프라이트) 를 걸고 사진은 자식으로 넣는다.
@@ -230,18 +233,22 @@ namespace ARZone
                 var mask = tile.AddComponent<Mask>();
                 mask.showMaskGraphic = false;
 
-                var photo = new GameObject("Photo", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+                // 서버 사진은 Texture2D 라 Image(Sprite) 가 아니라 RawImage 로 받는다.
+                // 타일 높이를 사진 비율에 맞춰 잡으므로 늘어나 보이지 않는다(크롭 불필요).
+                var photo = new GameObject("Photo", typeof(RectTransform), typeof(CanvasRenderer), typeof(RawImage));
                 photo.transform.SetParent(tile.transform, false);
                 var prt = photo.GetComponent<RectTransform>();
                 prt.anchorMin = Vector2.zero; prt.anchorMax = Vector2.one;
                 prt.offsetMin = Vector2.zero; prt.offsetMax = Vector2.zero;
-                var pimg = photo.GetComponent<Image>();
-                pimg.sprite = p.image;
-                pimg.preserveAspect = false;
-                pimg.raycastTarget = false;
+                var praw = photo.GetComponent<RawImage>();
+                praw.raycastTarget = false;
 
-                // 체크박스 — 시안(갤러리 편집-1): 원 지름 20, 타일 좌상단에서 중심 (20,20).
+                // 체크(브이) — 시안(갤러리 편집-1): 원 지름 20, 타일 좌상단에서 중심 (20,20).
                 // 스프라이트 잉크가 캔버스의 60/72 라 박스를 24 로 줘야 원이 20 으로 그려진다.
+                //
+                // ★ 앨범 사진(ALBUM_IMAGE)도 체크박스를 띄운다 — 시안이 8타일 전부에 그려놨다.
+                //   서버는 앨범 삭제를 400 으로 막지만, 데모에서 밟지 않는 경로라
+                //   유저 결정으로 시안을 따른다(docs/ARZONE_API연결_설계.md 7-3-1).
                 var check = new GameObject("Check", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
                 check.transform.SetParent(tile.transform, false);
                 var crt = check.GetComponent<RectTransform>();
@@ -252,42 +259,113 @@ namespace ARZone
                 crt.sizeDelta = new Vector2(24f, 24f);
                 var cimg = check.GetComponent<Image>();
                 cimg.raycastTarget = false;
-                bool isSel = selected.Contains(pi);
-                cimg.sprite = isSel ? checkOn : checkOff;
+                cimg.sprite = selected.Contains(item.Key) ? checkOn : checkOff;
                 check.SetActive(editing);
-                checks.Add(cimg);
 
-                int captured = pi;
+                var rec = new Tile { item = item, rect = rt, photo = praw, check = cimg };
+                tiles.Add(rec);
+
+                var captured = item;
                 tile.GetComponent<Button>().onClick.AddListener(() => OnTile(captured));
 
+                ApplyTexture(rec, item.texture != null ? item.texture : ImageCache.Peek(item.imageUrl));
+
+                // 아직 없으면 받아온다. 도착하면 그 타일만 비율을 고치고 열을 다시 앉힌다.
+                if (rec.photo.texture == null && !string.IsNullOrEmpty(item.imageUrl))
+                {
+                    var target = rec;
+                    ImageCache.Load(item.imageUrl, tex =>
+                    {
+                        if (target.rect == null) return;    // 그 사이 화면이 다시 그려졌다
+                        target.item.texture = tex;
+                        ApplyTexture(target, tex);
+                        Relayout();
+                    });
+                }
+            }
+
+            Relayout();
+        }
+
+        void ApplyTexture(Tile t, Texture2D tex)
+        {
+            if (t.photo == null) return;
+
+            if (tex == null)
+            {
+                // 자리표시자 — 사진이 오기 전(또는 실패). 흰 판이 뜨지 않게 어두운 색으로 둔다.
+                t.photo.texture = null;
+                t.photo.color = DesignTokens.Primitive.Neutral._900;
+                t.ratio = 1f;    // 비율을 모르니 정사각
+                return;
+            }
+
+            t.photo.texture = tex;
+            t.photo.color = Color.white;
+            t.ratio = tex.width > 0 ? (float)tex.height / tex.width : 1f;
+        }
+
+        // 타일을 다시 만들지 않고 자리만 잡는다. 사진이 한 장 도착할 때마다 불린다.
+        void Relayout()
+        {
+            if (content == null) return;
+
+            float[] colY = { 0f, 0f };
+
+            foreach (var t in tiles)
+            {
+                if (t.rect == null) continue;
+                float h = columnWidth * t.ratio;
+
+                int col = colY[0] <= colY[1] ? 0 : 1;
+                t.rect.anchoredPosition = new Vector2(col * (columnWidth + gap), -colY[col]);
+                t.rect.sizeDelta = new Vector2(columnWidth, h);
+
                 colY[col] += h + gap;
-                tiles.Add(tile);
             }
 
             float total = Mathf.Max(colY[0], colY[1]) - gap;
             content.sizeDelta = new Vector2(content.sizeDelta.x, Mathf.Max(0f, total));
         }
 
-        void OnTile(int index)
+        void OnTile(GalleryItem item)
         {
             if (editing)
             {
-                if (!selected.Remove(index)) selected.Add(index);
-                Refresh();
+                if (!selected.Remove(item.Key)) selected.Add(item.Key);
+                SyncHeader();
+                // 체크 스프라이트만 갈아끼운다 — 전체를 다시 그리면 받아둔 사진이 깜빡인다.
+                foreach (var t in tiles)
+                    if (t.check != null) t.check.sprite = selected.Contains(t.item.Key) ? checkOn : checkOff;
                 return;
             }
-            OpenDetail(index);
+            OpenDetail(item);
         }
 
-        void OpenDetail(int index)
+        void OpenDetail(GalleryItem item)
         {
-            if (index < 0 || index >= photos.Count) return;
-            detailIndex = index;
-            var p = photos[index];
+            if (item == null) return;
+            detailItem = item;
+            CurrentDetail = item;
+            if (btnReplay != null)
+                btnReplay.SetActive(item.sourceType == GallerySourceType.StageCapture
+                                    || item.sourceType == GallerySourceType.TrackCapture);
 
-            UiUtil.FitCover(detailPhoto, p.image != null ? p.image.texture : null);
-            if (detailTitle != null) detailTitle.text = p.title;
-            if (detailMeta != null) detailMeta.text = p.date;
+            // 유저 지시(2026-08-25): 상세에선 가두지 말고 원래 비율대로.
+            // FitCover 는 rect 0(꺼진 화면)에서 일찍 반환해 사진이 아예 안 뜨기도 했다.
+            UiUtil.FitContain(detailPhoto, item.texture);
+            // 썸네일이 아직 안 내려온(또는 실패한) 항목은 texture 가 null — RawImage 가 흰 사각형만 뜬다.
+            // 상세에서 직접 받아서 도착하면 같은 자리(비율 유지 FitContain)로 다시 그린다.
+            if (item.texture == null && !string.IsNullOrEmpty(item.imageUrl))
+                ImageCache.Load(item.imageUrl, tex =>
+                {
+                    if (tex == null || detailItem != item) return;   // 그새 다른 사진을 열었으면 버린다
+                    item.texture = tex;
+                    UiUtil.FitContain(detailPhoto, tex);
+                });
+            // ⚠ 서버 갤러리 응답에는 제목이 없다(id/sourceType/category/imageUrl/displayDate 뿐).
+            //   시안 문구를 지어내지 않으려고 detailTitle 은 건드리지 않는다.
+            if (detailMeta != null) detailMeta.text = (item.displayDate ?? "").Replace('-', '.');
 
             if (ScreenManager.Instance != null && !string.IsNullOrEmpty(detailScreen))
                 ScreenManager.Instance.Show(detailScreen);
@@ -307,7 +385,7 @@ namespace ARZone
         // 시안 '사진 상세 삭제' — 카드/버튼 좌표가 갤러리 삭제와 같아 모달을 공유하고 문구만 바꾼다
         public void AskDeleteDetail()
         {
-            if (detailIndex < 0 || detailIndex >= photos.Count)
+            if (detailItem == null)
             {
                 Debug.LogWarning("[Gallery] 상세로 연 사진이 없어 삭제할 수 없음");
                 return;
@@ -325,27 +403,31 @@ namespace ARZone
 
         void DoDelete()
         {
+            if (Store == null) { CloseDelete(); return; }
+
             // 상세에서 온 삭제는 그 한 장만 지우고 갤러리로 돌아간다
             if (deletingDetail)
             {
-                if (detailIndex >= 0 && detailIndex < photos.Count) photos.RemoveAt(detailIndex);
-                detailIndex = -1;
+                var one = new List<GalleryItem> { detailItem };
+                detailItem = null;
                 CloseDelete();
-                Refresh();
-                if (ScreenManager.Instance != null) ScreenManager.Instance.Back();
-                Toast.Show("사진이 삭제되었어요");
+                Store.Delete(one, () =>
+                {
+                    if (ScreenManager.Instance != null) ScreenManager.Instance.Back();
+                    Toast.Show("사진이 삭제되었어요");
+                });
                 return;
             }
 
-            var idx = new List<int>(selected);
-            idx.Sort((a, c) => c.CompareTo(a));      // 뒤에서부터 지워야 인덱스가 안 밀린다
-            foreach (int i in idx) if (i >= 0 && i < photos.Count) photos.RemoveAt(i);
+            var targets = new List<GalleryItem>();
+            foreach (var t in tiles)
+                if (selected.Contains(t.item.Key)) targets.Add(t.item);
 
             selected.Clear();
             CloseDelete();
             editing = false;
-            Refresh();
-            Toast.Show("사진이 삭제되었어요");
+
+            Store.Delete(targets, () => Toast.Show("사진이 삭제되었어요"));
         }
     }
 }

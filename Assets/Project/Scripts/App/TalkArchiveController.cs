@@ -25,6 +25,7 @@ namespace ARZone
         {
             public string date;
             [TextArea(2, 6)] public string text;
+            public int id;               // 서버 메시지 id — 보관 해제(unsave)에 쓴다
             public Item(string d, string t) { date = d; text = t; }
         }
 
@@ -79,18 +80,8 @@ namespace ARZone
         [SerializeField] float buttonH = 37f;
         [SerializeField] float bottomPad = 20f;
 
-        // 시안에 실제로 보이는 5장 그대로. 3·4·5번은 시안에서 잘려 있어 '...' 까지가 전부다
-        // (그 뒤 원문은 시안에 없다). 6번째 카드는 본문이 프레임 밖이라 넣지 않았다.
-        [Header("데이터 (시안에 보이는 것만)")]
-        [SerializeField]
-        List<Item> items = new List<Item>
-        {
-            new Item("2026. 06. 10", "오늘 하루 정말 힘들었지? 하지만 네가 있어서 정말 고마워. 언제나 너를 응원하고 있어, 힘내! 힘든 날도 지나갈 거야. 네가 겪는 모든 어려움은 결국 너를 더 강하게 만들어 줄 거야. 함께 이겨내자, 우리는 함께니까!"),
-            new Item("2026. 06. 03", "토론토에는 진짜 라쿤이랑 순록이 돌아다녀?"),
-            new Item("2026. 04. 29", "힘든 하루였지만 네 응원이 큰 힘이 됐어. 언제나 내 편이 되..."),
-            new Item("2026. 04. 15", "오늘도 네 말 한마디에 마음이 따뜻해졌어. 함께라서 행복해,..."),
-            new Item("2026. 03. 19", "세상이 힘들어도 네가 있어서 버틸 수 있어. 너의 우정이 내..."),
-        };
+        // 2026-08-25: 시안 더미 → 서버 보관함(GET conversation-archive) 으로 대체.
+        List<Item> items = new List<Item>();
 
         int expanded = -1;     // 유저 지시: 처음엔 전부 한 줄, 누른 카드만 펼친다
         int menuOpen = -1;
@@ -105,6 +96,26 @@ namespace ARZone
             if (btnSortIcon != null) btnSortIcon.onClick.AddListener(ToggleSort);
             menuOpen = -1;
             CloseDelete();
+
+            var store = ConversationStore.Instance;
+            if (store == null)
+            {
+                Debug.LogError("[Conv] ConversationStore 가 없다 — Canvas/ScreenManager 에 붙일 것");
+                ApplySort(); Build();
+                return;
+            }
+            store.LoadArchive(list =>
+            {
+                items.Clear();
+                foreach (var s in list)
+                {
+                    var it = new Item(s.dateText, s.text) { id = s.id };
+                    items.Add(it);
+                }
+                expanded = -1;
+                ApplySort();
+                Build();
+            });
             ApplySort();
             Build();
         }
@@ -176,8 +187,20 @@ namespace ARZone
         {
             if (pendingDelete >= 0 && pendingDelete < items.Count)
             {
-                items.RemoveAt(pendingDelete);
-                if (expanded >= items.Count) expanded = items.Count - 1;
+                var it = items[pendingDelete];
+                // 서버 보관 해제(DELETE …/unsave). 성공하면 화면에서도 뺀다.
+                if (ConversationStore.Instance != null && it.id > 0)
+                    ConversationStore.Instance.Unsave(it.id, () =>
+                    {
+                        items.Remove(it);
+                        if (expanded >= items.Count) expanded = items.Count - 1;
+                        Build();
+                    });
+                else
+                {
+                    items.RemoveAt(pendingDelete);
+                    if (expanded >= items.Count) expanded = items.Count - 1;
+                }
             }
             CloseDelete();
             Build();

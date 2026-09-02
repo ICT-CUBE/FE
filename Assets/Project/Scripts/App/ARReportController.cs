@@ -56,6 +56,17 @@ namespace ARZone
 
         static readonly CaptureService.Entry[] None = new CaptureService.Entry[0];
 
+        System.Collections.IEnumerator CoRefitThumbs()
+        {
+            yield return null;
+            foreach (var go in spawned)
+            {
+                if (go == null) continue;
+                var th = FindChild<RawImage>(go.transform, "Thumb");
+                if (th != null && th.texture != null) UiUtil.FitCover(th, th.texture);
+            }
+        }
+
         void OnEnable()
         {
             if (momentsScroll != null) momentsScroll.onValueChanged.AddListener(OnScrolled);
@@ -65,6 +76,7 @@ namespace ARZone
                 var list = captureSource != null ? captureSource.Captures : (System.Collections.Generic.IReadOnlyList<CaptureService.Entry>)None;
                 Populate("", list, ARListenController.LastWatchSeconds);
             }
+            else StartCoroutine(CoRefitThumbs());   // 화면 꺼진 채 Populate 된 경우의 크롭 보정
         }
 
         void OnDisable()
@@ -152,7 +164,8 @@ namespace ARZone
                 if (thumb == null) Debug.LogError($"[Report] 카드{i} 에 Thumb(RawImage) 가 없다");
                 else
                 {
-                    thumb.texture = e.Texture;
+                    // 그대로 대입하면 카드 비율로 늘어나 찌그러진다 — 비율 유지한 채 크롭(FitCover)
+                    UiUtil.FitCover(thumb, e.Texture);
                     thumb.color = Color.white;                 // 알파가 0 으로 남아 있으면 안 보인다
                     thumb.gameObject.SetActive(true);
                     if (e.Texture == null) Debug.LogWarning($"[Report] 카드{i} 텍스처가 null");
@@ -172,6 +185,9 @@ namespace ARZone
             }
 
             if (momentsScroll != null) momentsScroll.horizontalNormalizedPosition = 0f;
+            // Thumb 는 stretch 자식이라 이 프레임엔 rect 가 0 일 수 있고, 그러면 FitCover 가
+            // 크롭 비율을 못 정한다. 레이아웃이 잡힌 다음 프레임에 한 번 더 맞춘다.
+            if (isActiveAndEnabled) StartCoroutine(CoRefitThumbs());
             Debug.Log($"[Report] 카드 {spawned.Count}장 / {pages}페이지 배치 (content {content.sizeDelta.x}x{content.rect.height})");
             DumpCards();
             UpdateDots(0f);

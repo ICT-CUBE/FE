@@ -61,10 +61,11 @@ namespace ARZone
             m.claimable = false;
             m.claimed = true;
             if (missionList != null) missionList.Refresh();   // 버튼을 '완료됨' 으로
-            Toast.Show($"✨ JENNIE 친밀도 {m.reward}P 획득!");
+            // ✨ 이모지는 Pretendard 에 글리프가 없어 네모로 깨진다(2026-08-26 실기) — 뺐다
+            Toast.Show($"JENNIE 친밀도 {m.reward}P 획득!");
 
-            if (m.badgeReward) ShowBadge(m);
-            else ShowLevelUp(c);
+            // 2026-08-30 유저 지시: 보상받기 → '완료됨'으로 바뀌고 화면 이동 없이 그대로 둔다.
+            // (레벨업·뱃지 연출 화면으로 넘기던 것을 뺐다 — ShowBadge/ShowLevelUp 은 남겨둠)
         }
 
         void ShowLevelUp(MissionCatalog c)

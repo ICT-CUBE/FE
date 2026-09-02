@@ -24,11 +24,16 @@ namespace ARZone
         [Header("다음 버튼")]
         [SerializeField] Button next;
         [SerializeField] Image nextBackground;
+        // 2026-08-30 서버 auth 배포 — 여기서 회원가입 POST 가 나간다 (성공해야만 이동).
+        // 씬의 BtnStart ScreenButton 은 꺼뒀다 (켜져 있으면 실패해도 무조건 이동한다).
+        [SerializeField] string nextScreen = "SignupDone";
 
         int selected = -1;
+        bool busy;   // 응답 전 재클릭 방지
 
         void OnEnable()
         {
+            if (next != null) next.onClick.AddListener(OnSubmit);
             if (nickname != null) nickname.onValueChanged.AddListener(_ => Refresh());
 
             for (int i = 0; i < profiles.Count; i++)
@@ -47,8 +52,30 @@ namespace ARZone
 
         void OnDisable()
         {
+            if (next != null) next.onClick.RemoveListener(OnSubmit);
             if (nickname != null) nickname.onValueChanged.RemoveAllListeners();
             foreach (var b in profiles) if (b != null) b.onClick.RemoveAllListeners();
+        }
+
+        // 회원가입 — 이메일·비밀번호는 앞 화면(SignupFormBinder)이 들고 있고,
+        // 캐릭터 코드는 선택 인덱스로 만든다 (백엔드 규칙: profile_001 ~ profile_003).
+        void OnSubmit()
+        {
+            if (busy) return;
+            busy = true;
+            string code = $"profile_{selected + 1:000}";
+            ApiAuth.Signup(SignupFormBinder.PendingEmail, SignupFormBinder.PendingPassword,
+                nickname != null ? nickname.text : "", code,
+                _ =>
+                {
+                    busy = false;
+                    // 가입 때 고른 캐릭터를 로컬 프로필에도 반영 — 홈·허브 아이콘의 단일 출처
+                    // (profiles 순서 = 남성형/여성형/동물형 = ProfileStore 인덱스 순서)
+                    if (selected >= 0) ProfileStore.AvatarIndex = selected;
+                    if (ScreenManager.Instance != null && !string.IsNullOrEmpty(nextScreen))
+                        ScreenManager.Instance.Show(nextScreen);
+                },
+                err => { busy = false; Toast.Show(err); });
         }
 
         void Refresh()

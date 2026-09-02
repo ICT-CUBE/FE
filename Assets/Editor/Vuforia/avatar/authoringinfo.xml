@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QCARInfo>
+<TargetSet version="27.0" toolVersion="11.4.4">
+<ModelTarget name="avatar" targetId="24e06d6606b64acfb3f54dd3b992602f" version="14.0" toolVersion="11.4.4" bbox="-0.0132588 5.58794e-07 -0.0120624 0.0132606 0.0799955 0.0120623" upVector="0 1 0" previewImage="24e06d6606b64acfb3f54dd3b992602f_preview.jpg"/>
+
+</TargetSet>
+
+<Assembly name="avatars_assembly" assemblyId="80779be693a84dc39765f570dbae0879">
+<Part name="avatar" translation="0 0 0" rotation="AD: 0 0 1 0"/>
+<EntryPoint name="GuideView_0000" translation="9.36911e-07 0.039998 0.119052" rotation="AD: 1 0 0 180" image="avatar_GuideView_0000.png" trained="no">
+
+</EntryPoint>
+
+</Assembly>
+
+</QCARInfo>

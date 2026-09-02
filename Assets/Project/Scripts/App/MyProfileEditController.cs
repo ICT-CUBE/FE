@@ -108,6 +108,7 @@ namespace ARZone
             nicknameInput = nicknameField.gameObject.AddComponent<TMP_InputField>();
             nicknameInput.textViewport = art;
             nicknameInput.textComponent = tt;
+            InputFieldTuner.Tune(nicknameInput);   // ⚠ textComponent 배선 뒤에 불러야 캐럿(|)이 생긴다
             nicknameInput.placeholder = nicknameHint;
             nicknameInput.lineType = TMP_InputField.LineType.SingleLine;
             nicknameInput.onValueChanged.AddListener(_ => RefreshClear());

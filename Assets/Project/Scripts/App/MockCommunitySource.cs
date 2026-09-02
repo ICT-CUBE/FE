@@ -29,8 +29,33 @@ namespace ARZone
                     && (p.body == null || p.body.IndexOf(query, StringComparison.OrdinalIgnoreCase) < 0)) continue;
                 list.Add(p);
             }
-            // 목록은 이미 최신순으로 들고 있다(새 글은 맨 앞에 넣는다). CommunitySort 는 Latest 하나뿐.
+            // 시드가 시간순으로 안 들어 있을 수 있어(실측: 방금전→2시간→5시간→2시간…)
+            // timeText 를 '몇 분 전'으로 환산해 실제로 정렬한다. 같은 나이면 원래 순서 유지.
+            var keyed = new List<(CommunityPost p, int age, int idx)>(list.Count);
+            for (int i = 0; i < list.Count; i++) keyed.Add((list[i], AgeMinutes(list[i].timeText), i));
+            bool oldest = sort == CommunitySort.Oldest;
+            keyed.Sort((a, b) =>
+            {
+                int c = oldest ? b.age.CompareTo(a.age) : a.age.CompareTo(b.age);
+                return c != 0 ? c : a.idx.CompareTo(b.idx);
+            });
+            list.Clear();
+            foreach (var k in keyed) list.Add(k.p);
             done?.Invoke(list);
+        }
+
+        // "방금 전"/"N분 전"/"N시간 전"/"어제"/"N일 전" → 분. 모르는 표기는 맨 뒤로.
+        static int AgeMinutes(string t)
+        {
+            if (string.IsNullOrEmpty(t)) return int.MaxValue;
+            if (t.Contains("방금")) return 0;
+            int n = 0;
+            foreach (var c in t) if (c >= '0' && c <= '9') n = n * 10 + (c - '0');
+            if (t.Contains("분")) return n;
+            if (t.Contains("시간")) return n * 60;
+            if (t.Contains("어제")) return 24 * 60;
+            if (t.Contains("일")) return n * 24 * 60;
+            return int.MaxValue;
         }
 
         public void CreatePost(CommunityPost draft, Action<CommunityPost> done, Action<string> fail)

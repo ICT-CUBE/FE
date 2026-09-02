@@ -131,7 +131,8 @@ namespace ARZone
                 if (btnSendButton == null) btnSendButton = btnSend.gameObject.AddComponent<Button>();
                 btnSendButton.targetGraphic = btnSend;
                 btnSendButton.transition = Selectable.Transition.None;
-                btnSendButton.onClick.AddListener(OnSendComment);
+                // onClick 대신 PointerDown — 키보드 리프트 중 클릭 무산 방지 (UiUtil.OnPointerDown 주석)
+                UiUtil.OnPointerDown(btnSendButton.gameObject, OnSendComment);
             }
             if (btnMore != null)
             {
@@ -204,8 +205,19 @@ namespace ARZone
             }
 
             if (navTitle != null) navTitle.text = p.board;
-            if (authorIcon != null && p.authorIcon != null) authorIcon.sprite = p.authorIcon;
-            if (labelAuthor != null) labelAuthor.text = p.author;
+            // 내 글이면 아이콘은 현재 프로필(ProfileStore)을 따른다 — 마이페이지에서 바꾸면
+            // 재진입 시 바로 반영된다 (2026-08-31 유저 지시: "프로필 바꾸면 적용 안 돼")
+            if (authorIcon != null)
+            {
+                if (p.mine && myAvatarPool != null && myAvatarPool.Length > 0)
+                {
+                    int idx = Mathf.Clamp(ProfileStore.AvatarIndex, 0, myAvatarPool.Length - 1);
+                    authorIcon.sprite = myAvatarPool[idx];
+                }
+                else if (p.authorIcon != null) authorIcon.sprite = p.authorIcon;
+            }
+            // 내 글 작성자명 = 현재 프로필 닉네임 (아이콘과 같은 원칙 — 위 myAvatarPool 분기)
+            if (labelAuthor != null) labelAuthor.text = p.mine ? ProfileStore.Nickname : p.author;
             if (labelTime != null) labelTime.text = p.timeText;
 
             // 제목 — 줄바꿈, 말줄임 없음(글 전문)
@@ -346,7 +358,8 @@ namespace ARZone
 
             var author = UiUtil.MakeText(commentList, "Author", new TypeStyle(15f, FontWeight.SemiBold, 140, -1f),
                                          DesignTokens.Text.Primary, TextAlignmentOptions.MidlineLeft);
-            author.text = c.author;
+            // 내 댓글은 author="나" 로 저장된다(마이의 '댓글 단 글' 집계 마커) — 화면엔 현재 닉네임을 쓴다
+            author.text = c.author == "나" ? ProfileStore.Nickname : c.author;
             author.textWrappingMode = TextWrappingModes.NoWrap;
             author.overflowMode = TextOverflowModes.Overflow;
             UiUtil.Place(author, commentIndent, y + gapAvatarAuthor, 200f, 18f);
@@ -379,7 +392,9 @@ namespace ARZone
         {
             if (c.authorIcon != null) return c.authorIcon;
             if (myAvatarPool == null || myAvatarPool.Length == 0) return null;
-            int idx = AvatarNameBinder.SelectedProfile;
+            // 내 아이콘의 단일 출처는 ProfileStore (2026-08-31 — 예전 AvatarNameBinder.SelectedProfile 은
+            // 온보딩 안 거치면 -1 이라 항상 남성형(0)으로 떨어졌다: "댓글 달면 남자 프로필" 버그)
+            int idx = ProfileStore.AvatarIndex;
             if (idx < 0 || idx >= myAvatarPool.Length) idx = 0;
             return myAvatarPool[idx];
         }
@@ -415,6 +430,7 @@ namespace ARZone
             var field = commentInputBar.gameObject.AddComponent<TMP_InputField>();
             field.textViewport = art;
             field.textComponent = tt;
+            InputFieldTuner.Tune(field);   // ⚠ textComponent 배선 뒤에 불러야 캐럿(|)이 생긴다
             field.placeholder = commentHint;
             field.lineType = TMP_InputField.LineType.SingleLine;
             field.characterLimit = 300;
@@ -469,8 +485,16 @@ namespace ARZone
 
                 var photoImg = UiUtil.MakeImage(tile.transform, "PhotoImg", p.photos[i], Color.white);
                 var prt = (RectTransform)photoImg.transform;
-                prt.anchorMin = Vector2.zero; prt.anchorMax = Vector2.one;
-                prt.offsetMin = Vector2.zero; prt.offsetMax = Vector2.zero;
+                // 타일 rect 로 늘리면 찌그러진다 (2026-08-30 유저 지시: 비율 유지).
+                // 짧은 변을 타일에 맞춰 키우고 넘치는 부분은 라운드 마스크가 잘라낸다(크롭).
+                var sp = p.photos[i];
+                float w = sp != null ? sp.rect.width : photoH;
+                float h = sp != null ? sp.rect.height : photoH;
+                float k = Mathf.Max(photoH / Mathf.Max(1f, w), photoH / Mathf.Max(1f, h));
+                prt.anchorMin = prt.anchorMax = new Vector2(0.5f, 0.5f);
+                prt.pivot = new Vector2(0.5f, 0.5f);
+                prt.sizeDelta = new Vector2(w * k, h * k);
+                prt.anchoredPosition = Vector2.zero;
             }
             photoContent.sizeDelta = new Vector2(n * photoH + Mathf.Max(0, n - 1) * photoGap, photoH);
         }

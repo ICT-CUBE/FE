@@ -42,6 +42,23 @@ namespace ARZone
             if (btnDeleteConfirm != null) btnDeleteConfirm.onClick.AddListener(ConfirmDelete);
             CloseMenu();
             CloseDelete();
+
+            // 서버 VOICE 목록으로 대체 (2026-08-25, 유저 결정 "서버로 연결")
+            var store = ConversationStore.Instance;
+            if (store != null)
+            {
+                store.OnSessionsChanged += RebuildFromStore;
+                store.LoadSessions(ConversationType.Voice);
+            }
+            Build();
+        }
+
+        void RebuildFromStore()
+        {
+            var store = ConversationStore.Instance;
+            if (store == null || store.Type != ConversationType.Voice) return;
+            sessions = new List<VoiceHomeController.Session>();
+            foreach (var s in store.Sessions) sessions.Add(VoiceHomeController.FromServer(s));
             Build();
         }
 
@@ -50,13 +67,15 @@ namespace ARZone
             if (btnMenuDelete != null) btnMenuDelete.onClick.RemoveListener(OpenDelete);
             if (btnDeleteCancel != null) btnDeleteCancel.onClick.RemoveListener(CloseDelete);
             if (btnDeleteConfirm != null) btnDeleteConfirm.onClick.RemoveListener(ConfirmDelete);
+            if (ConversationStore.Instance != null)
+                ConversationStore.Instance.OnSessionsChanged -= RebuildFromStore;
         }
 
         void Build()
         {
             if (body == null) { Debug.LogError("[VoiceList] body 가 비어 있다"); return; }
             UiUtil.ClearChildren(body);
-            if (sessions == null || sessions.Count == 0) sessions = VoiceHomeController.MockAll;
+            if (sessions == null) sessions = new List<VoiceHomeController.Session>();   // 서버 0건이면 빈 목록 (유저 결정)
 
             float w = body.sizeDelta.x > 1f ? body.sizeDelta.x : 412f;   // OnEnable 시점엔 rect 가 아직 0 이다
             for (int i = 0; i < sessions.Count; i++)
@@ -145,11 +164,23 @@ namespace ARZone
 
         void ConfirmDelete()
         {
-            if (menuTarget >= 0 && menuTarget < sessions.Count) sessions.RemoveAt(menuTarget);
+            if (menuTarget >= 0 && menuTarget < sessions.Count)
+            {
+                var s = sessions[menuTarget];
+                if (s.id > 0 && ConversationStore.Instance != null)
+                {
+                    // 서버 삭제 — 성공하면 Store 가 OnSessionsChanged 로 목록을 다시 그린다
+                    ConversationStore.Instance.Delete(s.id, () => Toast.Show("음성 대화가 삭제되었어요."));
+                }
+                else
+                {
+                    sessions.RemoveAt(menuTarget);
+                    Build();
+                    Toast.Show("음성 대화가 삭제되었어요.");
+                }
+            }
             menuTarget = -1;
             CloseDelete();
-            Build();
-            Toast.Show("음성 대화가 삭제되었어요.");
         }
 
         void CopyFont(TMP_Text t)

@@ -39,7 +39,56 @@ namespace ARZone
 
         void Start()
         {
-            // 와이어프레임과 동일한 6개 (나중에 서버에서 받아옴)
+            // 2026-08-25: 와이어프레임 더미 → 서버(GET /users/me/missions) 로 대체.
+            // 실패하면 화면이 비지 않게 기존 더미를 그대로 쓴다.
+            ApiClient.Get("api/v1/users/me/missions", json =>
+            {
+                try
+                {
+                    var dto = JsonUtility.FromJson<MissionsDto>(json);
+                    var list = new List<MissionData>();
+                    AppendServer(list, dto != null ? dto.dailyMissions : null, "일일 미션");
+                    AppendServer(list, dto != null ? dto.eventMissions : null, "이벤트 미션");
+                    if (list.Count == 0) { PopulateFallback(); return; }
+                    Debug.Log($"[Mission] 서버 미션 {list.Count}개");
+                    Populate(list);
+                }
+                catch (System.Exception e)
+                {
+                    Debug.LogError($"[Api] 미션 파싱 실패: {e.Message}\n{json}");
+                    PopulateFallback();
+                }
+            },
+            err => { Debug.LogWarning($"[Mission] 목록 실패: {err} — 로컬 더미 유지"); PopulateFallback(); });
+        }
+
+        // 아이콘은 서버가 안 준다 — 씬에 물린 스프라이트를 제목으로 잇는다
+        // (서버 시드 제목이 와이어프레임과 같다: "홈 화면 방문하기" 등).
+        void AppendServer(List<MissionData> outList, MissionItemDto[] src, string typeLabel)
+        {
+            if (src == null) return;
+            foreach (var d in src)
+            {
+                Sprite on = null, off = null;
+                var t = d.title ?? "";
+                if (t.Contains("홈 화면"))            { on = icoVisitOn;   off = icoVisitOff; }
+                else if (t.Contains("대화"))          { on = icoTalkOn;    off = icoTalkOff; }
+                else if (t.Contains("음원") || t.Contains("재생")) { on = icoPlayOn; off = icoPlayOff; }
+                else if (t.Contains("소환"))          { on = icoCameraOn;  off = icoCameraOff; }
+                else if (t.Contains("갤러리"))        { on = icoGalleryOn; off = icoGalleryOff; }
+                else if (t.Contains("커뮤니티") || t.Contains("업로드")) { on = icoWriteOn; off = icoWriteOff; }
+
+                int rewardCount = d.reward != null ? d.reward.rewardCount : 0;
+                var m = Make(t, d.description ?? "", rewardCount, d.currentCount, d.targetCount, on, off);
+                m.claimable = d.status == "COMPLETED" && !d.rewardClaimed;
+                m.claimed = d.rewardClaimed;
+                m.typeLabel = typeLabel;
+                outList.Add(m);
+            }
+        }
+
+        void PopulateFallback()
+        {
             var missions = new List<MissionData>
             {
                 Make("홈 화면 방문하기",       "AR ZONE 접속",        5,  1, 1, icoVisitOn,   icoVisitOff),
@@ -49,8 +98,7 @@ namespace ARZone
                 Make("갤러리 둘러보기",        "아무 사진 5회 열람",    20, 1, 5, icoGalleryOn, icoGalleryOff),
                 Make("커뮤니티 글 업로드하기",  "게시물 1회 업로드",     10, 0, 1, icoWriteOn,   icoWriteOff),
             };
-            missions[1].claimed = true;   // 와프: 두 번째는 이미 '완료됨'
-
+            missions[1].claimed = true;
             Populate(missions);
         }
 
@@ -84,7 +132,36 @@ namespace ARZone
         {
             var m = new MissionData(title, desc, reward, cur, total, cur >= total, on);
             m.iconOff = off;
+            m.goScreen = GoScreenFor(title, desc);
             return m;
+        }
+
+        // '바로가기' / 상세 시트의 '미션 수행하러 가기' 대상 화면 (2026-08-26 배선).
+        // 서버·더미 미션 제목 둘 다 이 키워드를 지난다(아이콘 매칭과 같은 방식).
+        static string GoScreenFor(string title) => GoScreenFor(title, "");
+
+        // 제목에서 못 찾으면 설명문까지 본다 — 서버 미션 문구가 더미와 달라도 걸리게 (2026-08-31).
+        // '무대/공연'을 '재생'보다 먼저 봐야 "무대 5곡 시청" 이 앨범으로 새지 않는다.
+        static string GoScreenFor(string title, string desc)
+        {
+            string r = Match(title ?? "");
+            return !string.IsNullOrEmpty(r) ? r : Match(desc ?? "");
+
+            static string Match(string t)
+            {
+                if (t.Contains("홈"))                              return "Home";
+                if (t.Contains("대화"))                            return "TalkList";
+                if (t.Contains("무대") || t.Contains("공연")
+                    || t.Contains("시청"))                          return "StageList";
+                if (t.Contains("음원") || t.Contains("음악")
+                    || t.Contains("노래") || t.Contains("앨범")
+                    || t.Contains("감상") || t.Contains("재생"))    return "Album";
+                if (t.Contains("소환"))                            return "SummonScan";
+                if (t.Contains("갤러리") || t.Contains("사진"))     return "Gallery";
+                if (t.Contains("커뮤니티") || t.Contains("업로드")
+                    || t.Contains("글"))                            return "Community";
+                return "";
+            }
         }
 
         public void Populate(List<MissionData> missions)

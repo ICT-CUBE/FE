@@ -146,9 +146,34 @@ namespace ARZone
                 tiles.Add(tile);
             }
 
+            SizeContent();
+        }
+
+        // 저장 시트가 떠 있는 동안엔 시트 높이만큼 바닥 여백을 더해, 시트에 가린 마지막
+        // 줄까지 스크롤해 볼 수 있게 한다 (2026-08-31 실기 피드백 1: "하단탭 밑으로 스크롤 불가").
+        void SizeContent()
+        {
+            if (content == null) return;
             int rows = Mathf.CeilToInt(Count / 2f);
-            content.sizeDelta = new Vector2(content.sizeDelta.x,
-                                            Mathf.Max(0f, rows * (tileH + gap) - gap));
+            float h = Mathf.Max(0f, rows * (tileH + gap) - gap);
+            if (sheetSave != null && sheetSave.activeSelf)
+            {
+                var srt = sheetSave.transform as RectTransform;
+                // 시트 루트가 전체 화면(딤 포함)일 수도 있어 시트 패널 높이 범위로 잘라 쓴다
+                h += srt != null ? Mathf.Clamp(srt.rect.height, 200f, 380f) : 340f;
+            }
+            content.sizeDelta = new Vector2(content.sizeDelta.x, h);
+        }
+
+        bool lastSheetOpen;
+        void Update()
+        {
+            bool open = sheetSave != null && sheetSave.activeSelf;
+            if (open != lastSheetOpen)
+            {
+                lastSheetOpen = open;
+                SizeContent();   // 시트가 열리고 닫힐 때마다 스크롤 여백 갱신
+            }
         }
 
         void OnTile(int index)

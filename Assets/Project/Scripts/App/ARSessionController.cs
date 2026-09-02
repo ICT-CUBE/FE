@@ -10,6 +10,9 @@ namespace ARZone
     // 피규어 인식(Vuforia)과는 절대 동시에 켜지 않는다 — 카메라를 서로 뺏는다.
     public class ARSessionController : MonoBehaviour
     {
+        // 고폴리곤 성능 테스트 (2026-08-31 임시): PlaceAvatar 의 주석 참고. 측정 후 false 로.
+        static readonly bool HipolyTest = true;
+
         [SerializeField] GameObject arRigPrefab;   // AR Session + XR Origin
         [SerializeField] GameObject stagePrefab;   // StageGrid + StageScreen
         [SerializeField] Camera uiCamera;          // 평소 쓰는 Main Camera. AR 중엔 끈다.
@@ -195,8 +198,21 @@ namespace ARZone
 
             if (avatar == null)
             {
-                avatar = Instantiate(avatarPrefab, pose.position, Quaternion.identity);
+                // ── 고폴리곤 성능 테스트 스위치 (2026-08-31, 임시) ──
+                // true 면 AR 아바타만 189만 트라이앵글 모델(Resources/Avatars/avatar_hipoly)로
+                // 바꿔 FPS 를 잰다. 홈 무대는 vroid(4만) 그대로라 [FPS] 로그의 화면별 비교로
+                // 폴리곤 영향이 바로 나온다. 측정 끝나면 false 로 되돌릴 것 — 씬 배선 안 건드림.
+                GameObject prefab = avatarPrefab;
+                if (HipolyTest)
+                {
+                    var hp = Resources.Load<GameObject>("Avatars/avatar_hipoly");
+                    if (hp != null) { prefab = hp; Debug.Log("[FPS] 고폴리 아바타(189만tri)로 소환 — 테스트"); }
+                    else Debug.LogWarning("[FPS] avatar_hipoly 를 못 찾음 — 기본 아바타로 진행");
+                }
+                avatar = Instantiate(prefab, pose.position, Quaternion.identity);
                 avatar.SetActive(true);
+                FixSkinnedBounds(avatar);
+                AvatarBlink.Ensure(avatar);
                 FitAvatarHeight();
                 FaceAvatarToCamera();
                 Debug.Log($"[ARSession] 아바타 소환 {pose.position} 스케일 {avatar.transform.localScale.x:0.000}");
@@ -208,14 +224,36 @@ namespace ARZone
             }
         }
 
-        // 모델 원래 키가 제각각이라 실측해서 avatarHeight 에 맞춘다
+        // 블렌더 export 모델은 스킨 메시 바운드가 실제 몸보다 작게 잡히는 경우가 많다 —
+        // 카메라 각도·포즈에 따라 컬링으로 사라졌다 나타났다 한다 (2026-08-31 실기: 고폴리 "사라짐 자꾸").
+        // 바운드를 매 프레임 실제 스키닝 결과로 재계산하게 해서 오판을 없앤다.
+        public static void FixSkinnedBounds(GameObject go)
+        {
+            foreach (var smr in go.GetComponentsInChildren<SkinnedMeshRenderer>(true))
+                smr.updateWhenOffscreen = true;
+        }
+
+        // 모델 원래 키가 제각각이라 실측해서 avatarHeight 에 맞춘다.
+        // ⚠ 막 생성된 스킨 메시의 Renderer.bounds 는 발치 조각만 주기도 한다(실기: 거대 소환) —
+        //   휴머노이드 본(머리~발)으로 재고, 본이 없는 모델만 bounds 폴백.
         void FitAvatarHeight()
         {
             if (avatar == null || avatarHeight <= 0f) return;
             avatar.transform.localScale = Vector3.one;
-            var b = WorldBounds(avatar);
-            if (b.size.y <= 0.0001f) return;
-            avatar.transform.localScale = Vector3.one * (avatarHeight / b.size.y);
+
+            float h = 0f;
+            var an = avatar.GetComponentInChildren<Animator>(true);
+            if (an != null && an.isHuman)
+            {
+                var head = an.GetBoneTransform(HumanBodyBones.Head);
+                var foot = an.GetBoneTransform(HumanBodyBones.LeftFoot);
+                if (head != null && foot != null)
+                    h = (head.position.y - foot.position.y) * 1.12f;   // 정수리·머리카락 여유
+            }
+            if (h <= 0.0001f) h = WorldBounds(avatar).size.y;
+            if (h <= 0.0001f) return;
+            avatar.transform.localScale = Vector3.one * (avatarHeight / h);
+            Debug.Log($"[ARSession] 아바타 키 실측 {h:0.00}m → 스케일 {avatarHeight / h:0.000}");
         }
 
         // VRM 은 +Z 가 정면이다 (아바타 홈에서 회전 0 일 때 등이 보이는 것으로 확인).

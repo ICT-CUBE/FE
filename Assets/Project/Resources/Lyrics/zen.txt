@@ -1,43 +1,42 @@
 # ZEN — 가사 싱크 파일 (LRC 형식)
 # 타임스탬프 [분:초.centi] 를 각 줄 앞에 붙이면 싱크됩니다. 지금은 가사만 있습니다.
 # 원본: 가사 모음.docx (2026-08-08)
-
-I tell 'em, &quot;Down, now&quot;
-On that energy, yes
-I am what you think about me
-Cross me, please
-I'ma keep it Z, Zen
-Presence, bless
-Money can't buy sixth sense
-Bad bitch, 'kay, so make me better
-Fire aura quiets chatter
-Shoo, shoo, shoo, I make 'em scatter
-They can't move my matter
-Nobody gon' move my soul, gon' move my aura, my matter
-Nobody gon' move my light, gon' touch my glow, my matter
-Nobody gon'-, all this power make them scatter
-No, nobody gon' touch my soul, gon' match my glow, like
-I dare you (hey)
-shake me
-(Ah, ah) hey
-Thick skin layered like chains on chains on chains
-Wear the pressure on my neck and rings
-Rain, midnight bloom
-In the dark, I grew
-Shoo, shoo, shoo, shoo, shoo, shoo, freeze
-Shoo, shoo, shoo, shoo, shoo, shoo, gleam
-Shoo, shoo, shoo, shoo, shoo, shoo (one hunnid, one hunnid), ten
-Shoo, shoo, shoo, shoo (one hunnid), money cannot buy no real friends
-Baddest, they can't make me badder
-Fire aura quiets chatter
-Shoo, shoo, shoo, I make 'em scatter
-They can't move my matter
-Nobody gon' move my soul, gon' move my aura, my matter
-Nobody gon' move my light, gon' touch my glow, my matter
-Nobody gon', all this power make them scatter
-No, nobody gon' touch my soul, gon' match my glow, like
-I dare you (hey)
-shake me
-(Ah, ah) hey
-(Ah, ah)
-(Ah, ah) can't be two of one
+[00:22.08]I tell 'em, "Down, now"
+[00:26.04]On that energy, yes
+[00:29.56]I am what you think about me
+[00:33.04]Cross me, please
+[00:38.96]I'ma keep it Z, Zen
+[00:43.89]Presence, bless
+[00:47.22]Money can't buy sixth sense
+[00:49.31]Bad bitch, 'kay, so make me better
+[00:53.62]Fire aura quiets chatter
+[00:58.11]Shoo, shoo, shoo, I make 'em scatter
+[01:02.62]They can't move my matter
+[01:05.93]Nobody gon' move my soul, gon' move my aura, my matter
+[01:10.27]Nobody gon' move my light, gon' touch my glow, my matter
+[01:14.71]Nobody gon'-, all this power make them scatter
+[01:20.26]No, nobody gon' touch my soul, gon' match my glow, like
+[01:23.85]I dare you (hey)
+[01:28.31]shake me
+[01:29.29](Ah, ah) hey
+[01:33.72]Thick skin layered like chains on chains on chains
+[01:39.21]Wear the pressure on my neck and rings
+[01:44.21]Rain, midnight bloom
+[01:50.34]In the dark, I grew
+[01:51.43]Shoo, shoo, shoo, shoo, shoo, shoo, freeze
+[01:56.11]Shoo, shoo, shoo, shoo, shoo, shoo, gleam
+[02:00.33]Shoo, shoo, shoo, shoo, shoo, shoo (one hunnid, one hunnid), ten
+[02:04.70]Shoo, shoo, shoo, shoo (one hunnid), money cannot buy no real friends
+[02:09.30]Baddest, they can't make me badder
+[02:13.62]Fire aura quiets chatter
+[02:18.03]Shoo, shoo, shoo, I make 'em scatter
+[02:22.55]They can't move my matter
+[02:25.87]Nobody gon' move my soul, gon' move my aura, my matter
+[02:30.29]Nobody gon' move my light, gon' touch my glow, my matter
+[02:34.71]Nobody gon', all this power make them scatter
+[02:40.31]No, nobody gon' touch my soul, gon' match my glow, like
+[02:44.10]I dare you (hey)
+[02:48.32]shake me
+[02:49.20](Ah, ah) hey
+[02:53.67](Ah, ah)
+[02:58.31](Ah, ah) can't be two of one

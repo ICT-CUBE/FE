@@ -51,15 +51,17 @@ namespace ARZone
         // AR 소환은 스캔·인식 성공 화면을 따로 쓴다 (유저 지시 — 기존 Scan AR 화면을 돌려쓰지 않는다)
         const string SummonScanId = "SummonScan";
         const string SummonPlaceId = "SummonPlace";
+        // AR 감상 — 정적 이미지 대신 실제 카메라에 아바타를 세운다 (2026-08-28 유저 지시)
+        const string ListenId = "ARListen";
 
         // 카메라가 실제로 필요한 화면
         static readonly HashSet<string> CameraScreens = new HashSet<string>
-        { ScanId, PlaceId, StageId, SummonId, SummonScanId, SummonPlaceId };
+        { ScanId, PlaceId, StageId, SummonId, SummonScanId, SummonPlaceId, ListenId };
 
         // 세션을 유지해야 하는 화면 (무대를 살려둬야 하는 구간)
         static readonly HashSet<string> KeepAlive = new HashSet<string>
         { GuideId, ScanId, PlaceId, StageId, ReportId, DetailId, SummonId,
-          SummonScanId, SummonPlaceId,
+          SummonScanId, SummonPlaceId, ListenId,
           "Hub", "StageList", "StageDetail" };
 
         bool subscribed;
@@ -109,8 +111,37 @@ namespace ARZone
             subscribed = false;
         }
 
+        // ── 서버 아바타 소환 세션 (2026-08-25 배선) ──
+        // 소환 구간(SummonScan→SummonPlace→ARSummon)에 들어올 때 서버 세션을 만들고,
+        // 벗어날 때 COMPLETED 로 닫는다. 캡처 업로드가 이 id 로 나간다.
+        readonly IAvatarSource avatarSrc = new ApiAvatarSource();
+        public static int SummonSessionId;    // ARSummonController.Shoot 이 읽는다
+        bool wasSummon;
+
+        void SyncSummonSession(string id)
+        {
+            bool summon = IsSummonScreen(id);
+            if (summon == wasSummon) return;
+            wasSummon = summon;
+
+            if (summon)
+            {
+                avatarSrc.CreateSession(sid => SummonSessionId = sid,
+                    err => Debug.LogWarning($"[Avatar] 소환 세션 생성 실패: {err} — 캡처 업로드가 안 나간다"));
+            }
+            else if (SummonSessionId > 0)
+            {
+                int sid = SummonSessionId;
+                SummonSessionId = 0;
+                avatarSrc.EndSession(sid, null,
+                    err => Debug.LogWarning($"[Avatar] 소환 세션 종료 실패: {err}"));
+            }
+        }
+
         void OnScreenChanged(string id)
         {
+            SyncSummonSession(id);
+
             if (session == null)
             {
                 Debug.LogError("[ARFlow] Session 이 비어 있음 — 인스펙터에서 ARManagers 를 넣을 것");
@@ -169,10 +200,24 @@ namespace ARZone
                     if (placement != null) placement.End();
                     session.ConfirmPlacement();
                     break;
+
+                case ListenId:
+                    // AR 감상 — 스캔·배치 없이 카메라만 켠다. 아바타는 ARListenController 가
+                    // 카메라 앞에 직접 세운다(PlaceLipSyncAvatar).
+                    if (scanner != null) scanner.End();
+                    if (placement != null) placement.End();
+                    session.SetScanning(false);
+                    session.ShowGrid(false);
+                    break;
             }
 
-            session.ShowStage(!summon);
-            session.ShowAvatar(summon);
+            bool listen = id == ListenId;
+            session.ShowStage(!summon && !listen);      // 감상 화면에서 무대가 겹쳐 보이면 안 된다
+            // 아바타는 '배치가 끝난 화면'에서만 켠다. 스캔·배치 중엔 감춘다 —
+            // 다른 흐름(AR 감상 등)이 만들어둔 아바타가 배치 전에 옛 위치에 미리 보이면
+            // "배치한 곳과 무관하게 나타난다" (2026-08-28 실기). 배치 레이캐스트가
+            // 실제로 놓는 순간 StagePlacementController 가 다시 켠다.
+            session.ShowAvatar((summon && id == SummonId) || listen);
         }
 
         // 지금 열려 있는 스캔 화면 → 그 짝이 되는 인식 성공 화면

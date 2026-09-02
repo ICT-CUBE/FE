@@ -43,7 +43,8 @@ namespace ARZone
         [SerializeField] TMP_Text captureMeta;
         [SerializeField] TMP_Text captureShotText;   // "촬영 및 저장된 사진 수 4장"
         [SerializeField] TMP_Text captureTimeText;   // "관람 시간 10:49"
-        [SerializeField] Button btnCapBack;
+        // BtnCapBack 은 씬의 ScreenButton(back)이 처리한다. 여기서도 훅을 걸면 Back 이 두 번
+        // 실행돼 한 화면을 건너뛴다 (2026-08-28 실기: 갤러리→상세→뒤로가 홈까지 빠졌다).
         [SerializeField] Button btnCapRetry;         // 다시 시도 — 다시 촬영하러 무대로
         [SerializeField] Button btnCapConfirm;       // 저장 — 저장 위치 시트
         [SerializeField] Button btnCapSave;          // 사진 위 다운로드 아이콘
@@ -65,6 +66,12 @@ namespace ARZone
         [SerializeField] Button btnReplayCancel;
         [SerializeField] Button btnReplayStart;
         [SerializeField] string guideScreen = "ARGuide";
+
+        // 감상 리포트(ListenReport) 하단 — 씬의 BtnReplay/BtnExit 는 배선이 없어 죽은 버튼이었다 (2026-08-28 실기)
+        [Header("감상 리포트")]
+        [SerializeField] Button btnListenReplay;     // 다시 재생 → AR 감상 처음부터
+        [SerializeField] Button btnListenExit;       // 나가기 → 음악 상세
+        [SerializeField] string musicScreen = "MusicDetail";
 
         const string StageId = "ARStage";
         const string ReportId = "ARReport";
@@ -88,7 +95,6 @@ namespace ARZone
             Hook(btnReportBack, OnCapBack);
             Hook(btnSaveApp, OnSaveApp);
             Hook(btnSavePhone, OnSavePhone);
-            Hook(btnCapBack, OnCapBack);
             Hook(btnCapRetry, OnCapRetry);
             Hook(btnCapConfirm, OnCapSaveSheet);
             Hook(btnCapSave, OnCapSaveSheet);
@@ -98,6 +104,8 @@ namespace ARZone
             Hook(btnCapReplay, OnCapReplay);
             Hook(btnReplayCancel, CloseReplayModal);
             Hook(btnReplayStart, OnReplayStart);
+            Hook(btnListenReplay, OnListenReplay);
+            Hook(btnListenExit, OnListenExit);
             SetActive(modalARReplay, false);
 
             if (stagePlayer != null) stagePlayer.Finished += OnVideoFinished;
@@ -143,7 +151,6 @@ namespace ARZone
             Unhook(btnReportBack, OnCapBack);
             Unhook(btnSaveApp, OnSaveApp);
             Unhook(btnSavePhone, OnSavePhone);
-            Unhook(btnCapBack, OnCapBack);
             Unhook(btnCapRetry, OnCapRetry);
             Unhook(btnCapConfirm, OnCapSaveSheet);
             Unhook(btnCapSave, OnCapSaveSheet);
@@ -153,6 +160,8 @@ namespace ARZone
             Unhook(btnCapReplay, OnCapReplay);
             Unhook(btnReplayCancel, CloseReplayModal);
             Unhook(btnReplayStart, OnReplayStart);
+            Unhook(btnListenReplay, OnListenReplay);
+            Unhook(btnListenExit, OnListenExit);
 
             if (stagePlayer != null) stagePlayer.Finished -= OnVideoFinished;
             if (report != null)
@@ -206,11 +215,44 @@ namespace ARZone
                 if (!stagePlayer.HasVideo)
                     Debug.LogWarning("[ARMedia] VideoPlayer 를 못 찾음 — ARRig 가 생성됐는지 확인");
                 if (!counted) { shotsAtStageStart = capture != null ? capture.Count : 0; counted = true; }
+                // 서버 스트리밍 (2026-08-26 전환) — 무대 상세를 거쳐 왔으면 URL 이 캐시돼 있어
+                // 콜백이 동기로 끝나 Play 전에 소스가 바뀐다. 실패/미캐시면 프리팹 로컬 클립 그대로.
+                var sel0 = StageCatalog.Instance != null ? StageCatalog.Instance.Selected : null;
+                // ★ 선택한 무대의 로컬 클립을 먼저 꽂는다 — ARRig 프리팹엔 기본 클립 하나만
+                //   박혀 있어서, 서버 매칭이 안 되는 무대(서버에 없는 곡·미로그인)는 어떤
+                //   무대를 골라도 같은 영상이 나왔다 (2026-08-30 실기).
+                {
+                    var vp0 = session != null ? session.Video : null;
+                    if (vp0 != null && sel0 != null && sel0.clip != null
+                        && !vp0.isPlaying && vp0.clip != sel0.clip)
+                    {
+                        vp0.Stop();
+                        vp0.source = UnityEngine.Video.VideoSource.VideoClip;
+                        vp0.clip = sel0.clip;
+                        vp0.Prepare();
+                        Debug.Log($"[ARMedia] 무대 '{sel0.title}' 로컬 클립 장착");
+                    }
+                }
+                ApiMediaSource.GetStageVideoUrl(sel0 != null ? sel0.title : stageTitle, url =>
+                {
+                    var vp = session != null ? session.Video : null;
+                    if (string.IsNullOrEmpty(url) || vp == null || vp.isPlaying) return;
+                    // URL 재생 실패(코덱·네트워크) 시 프리팹 로컬 클립으로 되돌린다 — 흰 화면 방지
+                    vp.errorReceived -= OnStageVideoError;
+                    vp.errorReceived += OnStageVideoError;
+                    vp.source = UnityEngine.Video.VideoSource.Url;
+                    vp.url = url;
+                    Debug.Log("[ARMedia] 무대 서버 영상으로 전환");
+                });
                 stagePlayer.Play();
+                // 서버 무대 세션 (2026-08-25 배선) — 어느 무대인지는 카탈로그의 선택값으로 잇는다
+                var sel = StageCatalog.Instance != null ? StageCatalog.Instance.Selected : null;
+                ApiMediaSource.BeginStage(sel != null ? sel.title : stageTitle, ar: true);
             }
             else if (id == ReportId)
             {
                 stagePlayer.Pause();
+                ApiMediaSource.EndStage((float)stagePlayer.Time, watchSeconds);
                 // 이번 관람에서 찍은 것만 리포트에 넣는다 (앞서 AR 소환에서 찍어둔 건 제외)
                 if (report != null && capture != null)
                     report.Populate(stageTitle, ShotsThisSession(), watchSeconds);
@@ -223,6 +265,8 @@ namespace ARZone
                 //   까지 전부 걸려서, 촬영하자마자 리포트로 넘어가는 순간 사진이 다 날아갔다
                 //   (2026-08-18 실기: 리포트가 하얗고 오늘 찍은 사진들이 0장).
                 //   촬영분은 하루치 자산이고 CaptureService 가 디스크로도 들고 있으므로 지우지 않는다.
+                // 리포트를 안 거치고 나간 경우의 세션 마감 (이미 닫혔으면 안에서 무시된다)
+                ApiMediaSource.EndStage((float)stagePlayer.Time, watchSeconds);
                 stagePlayer.Stop();
                 stagePlayer.Unbind();
                 watchSeconds = 0f;
@@ -275,6 +319,35 @@ namespace ARZone
             if (ScreenManager.Instance != null) ScreenManager.Instance.Show(ReportId);
         }
 
+        // 감상 리포트 '다시 재생' — AR 감상으로 돌아가 처음부터. 같은 모드 재진입이라 자동재생 OK
+        // (모드 '변경' 시 일시정지 정책과 충돌하지 않는다)
+        void OnListenReplay()
+        {
+            MusicDetailController.PendingTime = 0f;
+            MusicDetailController.PendingPlaying = true;
+            if (ScreenManager.Instance != null) ScreenManager.Instance.Show("ARListen");
+        }
+
+        // 감상 리포트 '나가기' — 감상을 끝내고 음악 상세로
+        void OnListenExit()
+        {
+            if (ScreenManager.Instance != null && !string.IsNullOrEmpty(musicScreen))
+                ScreenManager.Instance.Show(musicScreen);
+        }
+
+        // 서버 URL 재생 실패 → 프리팹 로컬 클립으로 복귀 (VideoPlayer.clip 은 URL 전환 후에도 남아 있다)
+        void OnStageVideoError(UnityEngine.Video.VideoPlayer vp, string message)
+        {
+            bool canFallback = vp != null && vp.clip != null;
+            Debug.LogWarning($"[ARMedia] 무대 영상 재생 실패: {message}" +
+                             (canFallback ? " — 로컬 클립으로 복귀" : " (로컬 클립도 없음)"));
+            if (!canFallback) return;
+            vp.Stop();
+            vp.source = UnityEngine.Video.VideoSource.VideoClip;
+            vp.Prepare();
+            vp.Play();
+        }
+
         // 다시 재생 — 재스캔 없이 배치 유지한 채 처음부터
         void OnReplay()
         {
@@ -285,7 +358,20 @@ namespace ARZone
         void OnShutter()
         {
             if (capture == null) return;
-            capture.Capture(_ => StartCoroutine(FlashRoutine()));
+            capture.Capture(e =>
+            {
+                StartCoroutine(FlashRoutine());
+                // 서버 무대 캡처 (2026-08-25 배선) — 파일이 원본이라 그 바이트를 그대로 올린다
+                if (e != null && !string.IsNullOrEmpty(e.FilePath))
+                {
+                    try
+                    {
+                        var png = System.IO.File.ReadAllBytes(e.FilePath);
+                        ApiMediaSource.UploadStageCapture(png, (float)(stagePlayer != null ? stagePlayer.Time : 0d), e.TakenAt);
+                    }
+                    catch (System.Exception ex) { Debug.LogWarning($"[Media] 캡처 파일을 못 읽음: {ex.Message}"); }
+                }
+            });
         }
 
         System.Collections.IEnumerator FlashRoutine()
@@ -326,6 +412,10 @@ namespace ARZone
         void OnCardClicked(CaptureService.Entry e)
         {
             selected = e;
+            GalleryController.CurrentDetail = null;   // 이 상세는 갤러리가 아니라 AR 흐름에서 열렸다
+            // 갤러리가 앨범 사진을 열며 숨겼을 수 있다 — AR 촬영 상세는 무대 캡처라 항상 보인다
+            if (btnCapReplay != null && !btnCapReplay.gameObject.activeSelf)
+                btnCapReplay.gameObject.SetActive(true);
             UiUtil.FitCover(capturePhoto, e?.Texture);   // 늘어나지 않게 중앙 크롭
             if (captureTitle != null) captureTitle.text = $"{stageTitle} 무대 캡처";
             if (captureMeta != null && e != null)
@@ -362,12 +452,41 @@ namespace ARZone
         void CloseReplayModal() => SetActive(modalARReplay, false);
 
         // '시작하기' → 공간 스캔부터 다시 (AR 모드 가이드로)
+        // 갤러리에서 연 상세면 어느 무대였는지 서버(ar-experience)에 묻고 그 무대를 선택해 둔다.
+        // 화면 전환은 응답을 기다리지 않는다 — 스캔·배치(최소 1.8초) 동안 응답이 도착해
+        // ARStage 진입 시점(StageCatalog.Selected 를 읽는다)엔 선택이 끝나 있다. 늦으면 로그만.
         void OnReplayStart()
         {
             SetActive(modalARReplay, false);
+            var item = GalleryController.CurrentDetail;
+            if (item != null && GalleryStore.Instance != null)
+                GalleryStore.Instance.LoadArExperience(item, ApplyReplayTarget, null);
             ARGuideMode.Pending = ARGuideMode.Mode.StageAR;
             if (ScreenManager.Instance != null && !string.IsNullOrEmpty(guideScreen))
                 ScreenManager.Instance.Show(guideScreen);
+        }
+
+        // 서버가 알려준 원본 콘텐츠를 무대 선택에 반영한다.
+        // TRACK 재경험은 감상(ARListen) 흐름이라 무대 배치 시안과 안 맞는다 — 라우팅하지 않고 로그만.
+        void ApplyReplayTarget(GalleryArExperienceItemDto dto)
+        {
+            if (dto == null) return;
+            if (dto.contentType != "STAGE" || dto.stage == null)
+            {
+                Debug.LogWarning($"[ARMedia] AR재경험 {dto.contentType} 은 무대 흐름만 지원 — 현재 선택된 무대로 진행");
+                return;
+            }
+            var cat = StageCatalog.Instance;
+            if (cat == null) { Debug.LogWarning("[ARMedia] StageCatalog 없음 — 무대 선택 생략"); return; }
+            foreach (var s in cat.All)
+            {
+                if (!ApiMediaSource.TitleMatch(s.title, dto.stage.title) &&
+                    !ApiMediaSource.TitleMatch(s.title + " " + s.sub, dto.stage.title)) continue;
+                cat.Select(s);
+                Debug.Log($"[ARMedia] AR재경험: 무대 '{s.title}' 선택 (서버 '{dto.stage.title}')");
+                return;
+            }
+            Debug.LogWarning($"[ARMedia] AR재경험: 서버 무대 '{dto.stage.title}' 와 맞는 로컬 무대 없음 — 현재 선택 유지");
         }
 
         void OnCapShare() => Debug.Log("[ARMedia] 공유는 아직 미구현 — 네이티브 공유 필요");

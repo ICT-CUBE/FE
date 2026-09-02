@@ -1,64 +1,63 @@
 # with the IE (way up) — 가사 싱크 파일 (LRC 형식)
 # 타임스탬프 [분:초.centi] 를 각 줄 앞에 붙이면 싱크됩니다. 지금은 가사만 있습니다.
 # 원본: 가사 모음.docx (2026-08-08)
-
-are you? Are you?
-(Ah, uh, ah, uh) party in the back room
-(Ah, uh, ah, uh) I done left it in the restroom (incomin')
-(Ah, uh, ah, uh) now my attitude is yeah, yeah, yeah
-Way up, all the way up
-Shimmy, shimmy, yeah, I'ma let it go
-Shots fire on my way up
-Bulletproof glass when I'm ridin' through
-Way up, all the way up
-Gimme, gimme that, I won't let it go
-Shots fire on my way up
-Bulletproof glass when I'm ridin' through
-No more cycles on your merry-go
-Straight line's a hate crime, villain in a scary coat
-Your fuckin' sea of judgment, watch her, there she floats
-Nasty, flashy, wave-choppin' motor-boat
-Target on my name, but your aim's way off
-Why are you evaluatin' me on your day off?
-Set a fire now, said I want it now, uh-huh
-Spectators 'round hear the siren sound
-Way up, all the way up
-Shimmy, shimmy, yeah, I'ma let it go
-Shots fire on my way up
-Bulletproof glass when I'm ridin' through
-Way up, all the way up
-Gimme, gimme that, I won't let it go
-Shots fire on my way up
-Bulletproof glass when I'm ridin' through
-Rooftop when I party, turnt like a Harley
-Sorry not sorry, yeah
-Shadows all around me, close and they crowd me
-Breathe, I can hardly (ah)
-It seems I got a chokehold on 'em
-Everybody's cool, but when I do it I'm the problem
-Gave you too much and it's givin' spoiled rotten
-Got me stressed out bein' the trendin' topic
-Yeah, yeah, yeah, yeah, yeah, yeah, yeah, yeah (yeah, yeah, watch me)
-Why a killer never looked so sweet?
-Yeah, yeah, yeah, yeah, yeah, yeah, yeah, yeah (I'm so, set a fire now, set 'em all off, uh-huh)
-Yeah, yeah, yeah, yeah, yeah, yeah, yeah, yeah (spectators 'round hear the siren sound)
-I'm hot cold, gelato
-An angel, diablo
-I'm on one, I'm calm though
-Come, give me a kiss
-Get up out my face, yeah, yeah, yeah
-are you? Are you?
-(Ah, uh, ah, uh) party in the back room
-(Ah, uh, ah, uh) I done left you in the restroom
-(Ah, uh, ah, uh) now my attitude is yeah, yeah, yeah
-Way up, all the way up
-Shimmy, shimmy, yeah, I'ma let it go
-Shots fire on my way up
-Bulletproof glass when I'm ridin' through
-Way up, all the way up (yeah, yeah, yeah, yeah, yeah, yeah, yeah, yeah)
-Gimme, gimme that, I won't let it go (yeah, yeah, yeah, yeah, yeah, yeah, yeah, yeah)
-Shots fire on my way up (yeah, yeah, yeah, yeah, yeah, yeah, yeah, yeah)
-Bulletproof glass when I'm ridin' through
-Yeah, yeah, ah
-Set a fire now, said I want it now, uh-huh
-Spectators 'round hear the siren sound
+[00:02.05]are you? Are you?
+[00:03.52](Ah, uh, ah, uh) party in the back room
+[00:05.98](Ah, uh, ah, uh) I done left it in the restroom (incomin')
+[00:08.86](Ah, uh, ah, uh) now my attitude is yeah, yeah, yeah
+[00:12.68]Way up, all the way up
+[00:15.32]Shimmy, shimmy, yeah, I'ma let it go
+[00:18.00]Shots fire on my way up
+[00:20.61]Bulletproof glass when I'm ridin' through
+[00:23.32]Way up, all the way up
+[00:26.02]Gimme, gimme that, I won't let it go
+[00:28.63]Shots fire on my way up
+[00:30.88]Bulletproof glass when I'm ridin' through
+[00:33.55]No more cycles on your merry-go
+[00:35.36]Straight line's a hate crime, villain in a scary coat
+[00:37.83]Your fuckin' sea of judgment, watch her, there she floats
+[00:40.70]Nasty, flashy, wave-choppin' motor-boat
+[00:43.27]Target on my name, but your aim's way off
+[00:46.02]Why are you evaluatin' me on your day off?
+[00:48.61]Set a fire now, said I want it now, uh-huh
+[00:51.60]Spectators 'round hear the siren sound
+[00:55.19]Way up, all the way up
+[00:57.93]Shimmy, shimmy, yeah, I'ma let it go
+[01:00.57]Shots fire on my way up
+[01:03.24]Bulletproof glass when I'm ridin' through
+[01:06.02]Way up, all the way up
+[01:08.62]Gimme, gimme that, I won't let it go
+[01:11.27]Shots fire on my way up
+[01:13.95]Bulletproof glass when I'm ridin' through
+[01:16.14]Rooftop when I party, turnt like a Harley
+[01:19.28]Sorry not sorry, yeah
+[01:21.29]Shadows all around me, close and they crowd me
+[01:24.71]Breathe, I can hardly (ah)
+[01:26.52]It seems I got a chokehold on 'em
+[01:28.64]Everybody's cool, but when I do it I'm the problem
+[01:31.37]Gave you too much and it's givin' spoiled rotten
+[01:34.03]Got me stressed out bein' the trendin' topic
+[01:36.65]Yeah, yeah, yeah, yeah, yeah, yeah, yeah, yeah (yeah, yeah, watch me)
+[01:39.29]Why a killer never looked so sweet?
+[01:41.98]Yeah, yeah, yeah, yeah, yeah, yeah, yeah, yeah (I'm so, set a fire now, set 'em all off, uh-huh)
+[01:44.69]Yeah, yeah, yeah, yeah, yeah, yeah, yeah, yeah (spectators 'round hear the siren sound)
+[01:47.41]I'm hot cold, gelato
+[01:50.30]An angel, diablo
+[01:52.89]I'm on one, I'm calm though
+[01:55.63]Come, give me a kiss
+[01:56.66]Get up out my face, yeah, yeah, yeah
+[01:58.99]are you? Are you?
+[02:00.66](Ah, uh, ah, uh) party in the back room
+[02:03.41](Ah, uh, ah, uh) I done left you in the restroom
+[02:05.93](Ah, uh, ah, uh) now my attitude is yeah, yeah, yeah
+[02:09.88]Way up, all the way up
+[02:12.58]Shimmy, shimmy, yeah, I'ma let it go
+[02:15.22]Shots fire on my way up
+[02:17.92]Bulletproof glass when I'm ridin' through
+[02:20.67]Way up, all the way up (yeah, yeah, yeah, yeah, yeah, yeah, yeah, yeah)
+[02:23.28]Gimme, gimme that, I won't let it go (yeah, yeah, yeah, yeah, yeah, yeah, yeah, yeah)
+[02:25.90]Shots fire on my way up (yeah, yeah, yeah, yeah, yeah, yeah, yeah, yeah)
+[02:28.61]Bulletproof glass when I'm ridin' through
+[02:31.28]Yeah, yeah, ah
+[02:35.36]Set a fire now, said I want it now, uh-huh
+[02:37.97]Spectators 'round hear the siren sound

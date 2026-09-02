@@ -13,11 +13,17 @@ namespace ARZone
         [SerializeField] TMP_Text errEmail;        // "올바른 이메일 형식이 아닙니다."
         [SerializeField] Image emailCheck;         // 이메일 칸 우측 체크
         [SerializeField] Button loginButton;
+        // 2026-08-30 서버 auth 배포 — 로그인 성공 시에만 넘어간다.
+        // (씬의 BtnLogin ScreenButton 은 꺼뒀다 — 켜져 있으면 실패해도 무조건 이동한다)
+        [SerializeField] string nextScreen = "Home";   // 로그인하면 홈으로 (2026-08-30 유저 지시)
+
+        bool busy;   // 응답 전 재클릭 방지
 
         void OnEnable()
         {
             if (email != null) email.onValueChanged.AddListener(_ => Refresh());
             if (password != null) password.onValueChanged.AddListener(_ => Refresh());
+            if (loginButton != null) loginButton.onClick.AddListener(OnLogin);
             Refresh();
         }
 
@@ -25,6 +31,22 @@ namespace ARZone
         {
             if (email != null) email.onValueChanged.RemoveAllListeners();
             if (password != null) password.onValueChanged.RemoveAllListeners();
+            if (loginButton != null) loginButton.onClick.RemoveListener(OnLogin);
+        }
+
+        void OnLogin()
+        {
+            if (busy) return;
+            busy = true;
+            ApiAuth.Login(email != null ? email.text : "", password != null ? password.text : "",
+                _ =>
+                {
+                    busy = false;
+                    LoginModeSwitcher.HasSignedUp = true;   // 로그인 성공 = 가입 이력 확정
+                    if (ScreenManager.Instance != null && !string.IsNullOrEmpty(nextScreen))
+                        ScreenManager.Instance.Show(nextScreen);
+                },
+                err => { busy = false; Toast.Show(err); });
         }
 
         void Refresh()

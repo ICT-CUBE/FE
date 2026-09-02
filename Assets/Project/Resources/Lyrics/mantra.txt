@@ -6,62 +6,61 @@
 # - 타임스탬프 없이 가사만 적으면 화면엔 나오지만 싱크는 안 됩니다.
 # - 시간 순서가 뒤섞여 있어도 로드할 때 정렬됩니다.
 # 원본: 가사 모음.docx (2026-08-08)
-
-Pretty, pretty, pretty, pretty
-This that pretty-girl mantra, this that flaunt you
-Just touched down in L.A.
-Pretty girls don't do drama, 'less we wanna
-It'll be depending on the day
-Pretty girls packed in a Defender, know I'ma defend her
-Never let her catch no stray
-This that pretty-girl mantra, she's that stunna
-Make you wanna swing both ways
-Mix me with the drama (drama)
-Check you like commas (ah)
-My clothes are pajamas ('jamas)
-Straight from the cold plunge (hey) (ah)
-Daytime baddie use her mind
-Quick switch of the fit for the night (night)
-Swerving through the lane, we'll be twenty-minute-late
-'Cause we had to do an In-N-Out drive-by
-It's not that deep (deep), I'm not that drunk (drunk)
-Sometimes girls just gotta have fun
-Throw it back, all that ass
-Me and my sis, way too attached
-It's not that deep (deep), we're not that dumb (dumb)
-Look at them Bonnies on the run
-Inside glowing like the sun (sun, s-)
-You gonna feel us every day (day)
-This that pretty-girl mantra, this that flaunt you
-Just touched down in L.A.
-Pretty girls don't do drama, 'less we wanna
-It'll be depending on the day
-Pretty girls packed in a Defender, know I'ma defend her
-Never let her catch no stray
-This that pretty-girl mantra, she's that stunna
-Make you wanna swing both ways
-Love what it feel like (feel like)
-To be off of the grid, like, all night
-Oh, with my bih like (bitch, like)
-We ain't even tryna talk to no one
-Swerve off all the creeps, no weird vibes
-We ain't never let it ruin a good time
-Ain't nobody gon' dim our good light
-This them words we're living by
-This that pretty-girl mantra, this that flaunt you
-Just touched down in L.A. (ah)
-Pretty girls don't do drama, 'less we wanna
-It'll be depending on the day (ah, ah, ah)
-Pretty girls packed in a Defender, know I'ma defend her
-Never let her catch no stray (ah, ah)
-This that pretty-girl mantra, she's that stunna
-Make you wanna swing both ways (ah, ah)
-This that pretty-girl mantra, this that flaunt you
-Just touched down in L.A. (ah, ah)
-Pretty girls don't do drama, no new drama
-We already got a full day (ah, ah)
-Pretty girls that you gon' remember, know that you could never
-Nothing ever trigger me (ah, ah)
-This that pretty-girl mantra, she's that stunna
-Everyone know that she is me (ah)
-Pretty
+[00:09.03]Pretty, pretty, pretty, pretty
+[00:11.28]This that pretty-girl mantra, this that flaunt you
+[00:13.70]Just touched down in L.A.
+[00:15.35]Pretty girls don't do drama, 'less we wanna
+[00:17.99]It'll be depending on the day
+[00:19.40]Pretty girls packed in a Defender, know I'ma defend her
+[00:22.07]Never let her catch no stray
+[00:23.50]This that pretty-girl mantra, she's that stunna
+[00:26.13]Make you wanna swing both ways
+[00:27.64]Mix me with the drama (drama)
+[00:28.97]Check you like commas (ah)
+[00:31.23]My clothes are pajamas ('jamas)
+[00:33.00]Straight from the cold plunge (hey) (ah)
+[00:35.86]Daytime baddie use her mind
+[00:37.42]Quick switch of the fit for the night (night)
+[00:39.81]Swerving through the lane, we'll be twenty-minute-late
+[00:41.60]'Cause we had to do an In-N-Out drive-by
+[00:43.54]It's not that deep (deep), I'm not that drunk (drunk)
+[00:45.49]Sometimes girls just gotta have fun
+[00:47.64]Throw it back, all that ass
+[00:49.65]Me and my sis, way too attached
+[00:51.77]It's not that deep (deep), we're not that dumb (dumb)
+[00:53.77]Look at them Bonnies on the run
+[00:55.86]Inside glowing like the sun (sun, s-)
+[00:58.38]You gonna feel us every day (day)
+[01:00.44]This that pretty-girl mantra, this that flaunt you
+[01:02.94]Just touched down in L.A.
+[01:04.56]Pretty girls don't do drama, 'less we wanna
+[01:07.15]It'll be depending on the day
+[01:08.72]Pretty girls packed in a Defender, know I'ma defend her
+[01:11.17]Never let her catch no stray
+[01:12.82]This that pretty-girl mantra, she's that stunna
+[01:15.36]Make you wanna swing both ways
+[01:16.98]Love what it feel like (feel like)
+[01:19.03]To be off of the grid, like, all night
+[01:21.03]Oh, with my bih like (bitch, like)
+[01:23.21]We ain't even tryna talk to no one
+[01:25.12]Swerve off all the creeps, no weird vibes
+[01:27.05]We ain't never let it ruin a good time
+[01:29.39]Ain't nobody gon' dim our good light
+[01:31.28]This them words we're living by
+[01:33.31]This that pretty-girl mantra, this that flaunt you
+[01:35.86]Just touched down in L.A. (ah)
+[01:37.36]Pretty girls don't do drama, 'less we wanna
+[01:39.97]It'll be depending on the day (ah, ah, ah)
+[01:41.56]Pretty girls packed in a Defender, know I'ma defend her
+[01:44.12]Never let her catch no stray (ah, ah)
+[01:45.60]This that pretty-girl mantra, she's that stunna
+[01:48.20]Make you wanna swing both ways (ah, ah)
+[01:49.73]This that pretty-girl mantra, this that flaunt you
+[01:52.27]Just touched down in L.A. (ah, ah)
+[01:53.80]Pretty girls don't do drama, no new drama
+[01:56.38]We already got a full day (ah, ah)
+[01:57.91]Pretty girls that you gon' remember, know that you could never
+[02:00.48]Nothing ever trigger me (ah, ah)
+[02:01.98]This that pretty-girl mantra, she's that stunna
+[02:04.46]Everyone know that she is me (ah)
+[02:21.96]Pretty

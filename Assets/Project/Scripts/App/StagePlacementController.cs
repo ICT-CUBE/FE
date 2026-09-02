@@ -67,7 +67,13 @@ namespace ARZone
                     : null;
                 if (plane != null && plane.alignment != PlaneAlignment.HorizontalUp) continue;
 
-                if (target == Target.Avatar) session.PlaceAvatar(h.pose);
+                if (target == Target.Avatar)
+                {
+                    session.PlaceAvatar(h.pose);
+                    session.ShowAvatar(true);   // 배치 화면 진입 시엔 감춰져 있다 — 실제로 놓일 때 켠다
+                    if (session.Avatar != null)
+                        AvatarVSign.Apply(session.Avatar.gameObject);   // 시안(AR 소환): 제니 V 사인 (2026-08-31)
+                }
                 else session.PlaceStage(h.pose);
                 break;
             }

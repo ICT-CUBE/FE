@@ -1,32 +1,31 @@
 # F.T.S. — 가사 싱크 파일 (LRC 형식)
 # 타임스탬프 [분:초.centi] 를 각 줄 앞에 붙이면 싱크됩니다. 지금은 가사만 있습니다.
 # 원본: 가사 모음.docx (2026-08-08)
-
-Maybe it's time to take a leap of faith (ah-ah, ah-ah)
-And come to my senses and take my shirt off in the rain (ah-ah, ah-ah)
-Strike a fuckin' match of love and desire and warm my hands up in the flame
-Whatever happened to freedom and honesty? (Ooh)
-What matters to you, you, you, it's not that deep to me
-Fuck that shit, ah, yeah
-Flip the script, ah, yeah
-Inside of me, ah, ooh
-Ooh, ooh, ooh, ooh
-Fuck that shit, I am
-Over it, ah, yeah
-Off the grid, ah, ooh
-Ooh, ooh, ooh, ooh (fuck that shit)
-I'm in love, you're on game
-Switchin' up, switchin' lanes
-Won't fight the urge, I'll go insane
-I'll say what I want if this shit's true (true)
-Oh, yeah, if that shit's true (if that shit's true)
-Whatever happened to freedom and honesty?
-What matters to you, you, you, it's not that deep to me
-Fuck that shit, ah, yeah
-Flip the script, ah, yeah
-Inside of me, ah, ooh
-Ooh, ooh, ooh, ooh
-Fuck that shit, I am
-Over it, ah, yeah
-Off the grid, ah, ooh
-Ooh, ooh, ooh, ooh (fuck that shit)
+[00:08.82]Maybe it's time to take a leap of faith (ah-ah, ah-ah)
+[00:15.74]And come to my senses and take my shirt off in the rain (ah-ah, ah-ah)
+[00:24.24]Strike a fuckin' match of love and desire and warm my hands up in the flame
+[00:31.90]Whatever happened to freedom and honesty? (Ooh)
+[00:39.50]What matters to you, you, you, it's not that deep to me
+[00:48.21]Fuck that shit, ah, yeah
+[00:51.72]Flip the script, ah, yeah
+[00:55.69]Inside of me, ah, ooh
+[00:59.70]Ooh, ooh, ooh, ooh
+[01:04.14]Fuck that shit, I am
+[01:08.17]Over it, ah, yeah
+[01:12.30]Off the grid, ah, ooh
+[01:15.67]Ooh, ooh, ooh, ooh (fuck that shit)
+[01:20.81]I'm in love, you're on game
+[01:22.83]Switchin' up, switchin' lanes
+[01:24.33]Won't fight the urge, I'll go insane
+[01:26.48]I'll say what I want if this shit's true (true)
+[01:30.21]Oh, yeah, if that shit's true (if that shit's true)
+[01:35.71]Whatever happened to freedom and honesty?
+[01:43.51]What matters to you, you, you, it's not that deep to me
+[01:52.07]Fuck that shit, ah, yeah
+[01:56.01]Flip the script, ah, yeah
+[02:00.03]Inside of me, ah, ooh
+[02:03.61]Ooh, ooh, ooh, ooh
+[02:08.09]Fuck that shit, I am
+[02:12.09]Over it, ah, yeah
+[02:16.10]Off the grid, ah, ooh
+[02:19.60]Ooh, ooh, ooh, ooh (fuck that shit)

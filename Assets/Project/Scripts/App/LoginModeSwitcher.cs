@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -27,8 +28,23 @@ namespace ARZone
             set { PlayerPrefs.SetInt(Key, value ? 1 : 0); PlayerPrefs.Save(); }
         }
 
+        [Header("자동 로그인 (2026-08-30)")]
+        // 저장된 액세스 토큰이 있으면 로그인 화면을 건너뛴다 — 앱을 껐다 켜도 로그인 유지.
+        [SerializeField] string autoSkipScreen = "Home";   // 자동 로그인도 홈으로 (2026-08-30)
+
         void OnEnable()
         {
+            ApiConfig.LoadSavedToken();
+            if (!string.IsNullOrEmpty(ApiConfig.AccessToken) && !string.IsNullOrEmpty(autoSkipScreen))
+            {
+                // ★ 여기서 바로 Show() 하면 안 된다 — ScreenManager 가 시작 화면을 켜는
+                //   순회 '도중'에 이 OnEnable 이 불려서, 옮겨간 화면을 순회의 나머지가
+                //   도로 꺼버린다 (2026-08-30 실기: 빌드가 까만 화면에서 안 벗어남).
+                //   초기화가 끝난 다음 프레임에 이동한다.
+                StartCoroutine(SkipNextFrame());
+                return;
+            }
+
             bool signed = HasSignedUp;
             string target = signed ? afterScreen : beforeScreen;
 
@@ -41,6 +57,13 @@ namespace ARZone
                 emailButton.onClick.RemoveAllListeners();
                 emailButton.onClick.AddListener(() => ScreenManager.Instance?.Show(target));
             }
+        }
+
+        IEnumerator SkipNextFrame()
+        {
+            yield return null;   // ScreenManager 초기 활성화 순회가 끝난 뒤
+            Debug.Log("[Auth] 저장된 토큰 있음 — 로그인 화면 건너뜀");
+            ScreenManager.Instance?.Show(autoSkipScreen);
         }
     }
 }

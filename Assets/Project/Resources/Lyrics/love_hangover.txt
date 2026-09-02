@@ -1,42 +1,41 @@
 # Love Hangover — 가사 싱크 파일 (LRC 형식)
 # 타임스탬프 [분:초.centi] 를 각 줄 앞에 붙이면 싱크됩니다. 지금은 가사만 있습니다.
 # 원본: 가사 모음.docx (2026-08-08)
-
-I'm over, I'm so over
-This love hangover
-Fight me, fight me, fight me
-You made me so unlike me
-I don't wanna talk, come behind me
-Know you ain't the one, but you might be
-Who sent you? Who sent you?
-Who sent you? Who sent you 'round again?
-I'm so, I'm so shady
-I don't really mind when you play me
-Wanna switch it up, go crazy
-I ain't gonna leave 'til you hate me
-Who sent you? Who sent you?
-Who sent you? Who sent you 'round?
-We say it's over, but I keep fucking with you (yeah)
-And every time I do, I wake up with this love hangover
-You got me pouring for two, I swore I'd never do it again
-Until you came over, I started lying with you (yeah)
-And every time I do, I wake up with this love hangover
-Ah, oh, I swear I'll never do it again
-Ah, shit, I did it again (call me back, call me back, call me back)
-Oh, but you know I'm gonna do it again
-(Oh, shit, oh, shit, call me back, call me back, call me back)
-Yeah, you know I'm gonna do it again
-I had woke up in a daze, my sweat was cold, my lip was cracked
-I can't leave this bitch, I had to single, double, triple back
-She gon' leave me, but she wants to keep me on, what's up with that?
-I don't even really got time for all that shit right now, I'm a baby father
-And all them jokes she told at dinner last night
-Ain't had me dead, I was playing possum
-And when the waiter brought the check
-She said, &quot;Let's head to mine, &quot; I said, &quot;Okay, awesome&quot;
-One minute, we're growing apart, and next I'm in her apartment
-Just watching her get naked and not thinking with my heart
-I ain't even really got time for all that shit right now (right now)
+[00:46.39]I'm over, I'm so over
+[00:51.01]This love hangover
+[00:52.88]Fight me, fight me, fight me
+[00:54.64]You made me so unlike me
+[00:56.43]I don't wanna talk, come behind me
+[00:58.05]Know you ain't the one, but you might be
+[00:59.46]Who sent you? Who sent you?
+[01:01.04]Who sent you? Who sent you 'round again?
+[01:06.27]I'm so, I'm so shady
+[01:07.68]I don't really mind when you play me
+[01:09.43]Wanna switch it up, go crazy
+[01:10.96]I ain't gonna leave 'til you hate me
+[01:12.42]Who sent you? Who sent you?
+[01:14.00]Who sent you? Who sent you 'round?
+[01:18.09]We say it's over, but I keep fucking with you (yeah)
+[01:21.65]And every time I do, I wake up with this love hangover
+[01:26.41]You got me pouring for two, I swore I'd never do it again
+[01:31.24]Until you came over, I started lying with you (yeah)
+[01:34.53]And every time I do, I wake up with this love hangover
+[01:39.33]Ah, oh, I swear I'll never do it again
+[01:43.94]Ah, shit, I did it again (call me back, call me back, call me back)
+[01:47.91]Oh, but you know I'm gonna do it again
+[01:51.66](Oh, shit, oh, shit, call me back, call me back, call me back)
+[01:55.78]Yeah, you know I'm gonna do it again
+[01:57.73]I had woke up in a daze, my sweat was cold, my lip was cracked
+[02:00.70]I can't leave this bitch, I had to single, double, triple back
+[02:03.83]She gon' leave me, but she wants to keep me on, what's up with that?
+[02:07.10]I don't even really got time for all that shit right now, I'm a baby father
+[02:10.02]And all them jokes she told at dinner last night
+[02:11.69]Ain't had me dead, I was playing possum
+[02:13.74]And when the waiter brought the check
+[02:14.84]She said, "Let's head to mine, " I said, "Okay, awesome"
+[02:16.74]One minute, we're growing apart, and next I'm in her apartment
+[02:20.12]Just watching her get naked and not thinking with my heart
+[02:23.45]I ain't even really got time for all that shit right now (right now)
 But if she wanted it right now (right now)
 Then I could meet you there right now (right now)
 Even though you barely even drink (uh-huh)

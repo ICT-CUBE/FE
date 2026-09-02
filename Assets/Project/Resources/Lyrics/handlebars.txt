@@ -1,47 +1,46 @@
 # Handlebars — 가사 싱크 파일 (LRC 형식)
 # 타임스탬프 [분:초.centi] 를 각 줄 앞에 붙이면 싱크됩니다. 지금은 가사만 있습니다.
 # 원본: 가사 모음.docx (2026-08-08)
-
-I trip and fall in love
-Just like a Tuesday drunk
-I always go all in, all in, all in
-Over the handlebars
-Hitting the ground so hard
-If I'm alone, fallin', fallin', fallin'
-We ain't gotta talk about it
-Mercy
-Why is it love is never kind to me?
-I heard that fools rush in and, yeah, that's me
-It burns me time and time again
-So why am I still fixing for this frying pan, thinkin'
-I wonder what you're doing for tonight and forever (oh-oh)
-I could be the rest of your life or whatever
-My lips and your lips, we could press them together ('gether, 'gether, 'gether)
-I don't ever think twice, and, baby, that's why
-I trip and fall in love
-Just like a Tuesday drunk
-I always go all in, all in, all in
-Over the handlebars
-Hitting the ground so hard
-If I'm alone, fallin', fallin', fallin'
-Another round, another drink
-I try to stop, but I can't think
-About anything else but you (but you)
-And I'm a little too buzzed on your love to play it cute
-A single kiss, I lost my mind for seven days and seven nights
-Can't eat, sleep, baby, it's true (it's true)
-Tryna bite my lip, I'm probably gonna slip
-And say some crazy things to you
-I wonder what you're doing for tonight and forever (oh-oh)
-I don't ever think twice, and maybe that's why
-I trip and fall in love
-Just like a Tuesday drunk
-I always go all in, all in (all in, all in), all in
-Over the handlebars
-Hitting the ground so hard
-If I'm alone, fallin', fallin', fallin' (fallin', yeah)
-We ain't gotta talk about it
-Na-na-na-na-na-na, na (yeah)
-We ain't gotta talk about it
-Na-na-na-na-na-na, na
-We ain't gotta talk about it
+[00:02.12]I trip and fall in love
+[00:05.12]Just like a Tuesday drunk
+[00:08.13]I always go all in, all in, all in
+[00:14.41]Over the handlebars
+[00:17.42]Hitting the ground so hard
+[00:20.50]If I'm alone, fallin', fallin', fallin'
+[00:27.01]We ain't gotta talk about it
+[00:28.58]Mercy
+[00:31.84]Why is it love is never kind to me?
+[00:37.90]I heard that fools rush in and, yeah, that's me
+[00:44.00]It burns me time and time again
+[00:46.97]So why am I still fixing for this frying pan, thinkin'
+[00:52.65]I wonder what you're doing for tonight and forever (oh-oh)
+[00:58.82]I could be the rest of your life or whatever
+[01:04.97]My lips and your lips, we could press them together ('gether, 'gether, 'gether)
+[01:10.90]I don't ever think twice, and, baby, that's why
+[01:15.76]I trip and fall in love
+[01:18.75]Just like a Tuesday drunk
+[01:21.81]I always go all in, all in, all in
+[01:28.02]Over the handlebars
+[01:31.06]Hitting the ground so hard
+[01:34.16]If I'm alone, fallin', fallin', fallin'
+[01:41.53]Another round, another drink
+[01:43.54]I try to stop, but I can't think
+[01:46.00]About anything else but you (but you)
+[01:49.06]And I'm a little too buzzed on your love to play it cute
+[01:53.81]A single kiss, I lost my mind for seven days and seven nights
+[01:58.36]Can't eat, sleep, baby, it's true (it's true)
+[02:01.30]Tryna bite my lip, I'm probably gonna slip
+[02:04.18]And say some crazy things to you
+[02:06.24]I wonder what you're doing for tonight and forever (oh-oh)
+[02:11.85]I don't ever think twice, and maybe that's why
+[02:17.27]I trip and fall in love
+[02:20.15]Just like a Tuesday drunk
+[02:23.25]I always go all in, all in (all in, all in), all in
+[02:29.40]Over the handlebars
+[02:32.53]Hitting the ground so hard
+[02:35.61]If I'm alone, fallin', fallin', fallin' (fallin', yeah)
+[02:41.84]We ain't gotta talk about it
+[02:43.15]Na-na-na-na-na-na, na (yeah)
+[02:48.06]We ain't gotta talk about it
+[02:49.65]Na-na-na-na-na-na, na
+[02:54.24]We ain't gotta talk about it

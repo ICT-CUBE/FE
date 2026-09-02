@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- 커스텀 메인 매니페스트 (2026-08-31).
+     ⚠ 이 파일은 유니티 기본 템플릿을 '대체'한다 — 병합 조각이 아니다. 그래서 유니티가
+     기본으로 넣어주는 런처 액티비티 선언까지 여기 있어야 한다 (빠뜨리면
+     "No activity with MAIN/LAUNCHER" 로 빌드 실행이 죽는다 — 08-31 실측).
+     프로젝트는 Application Entry = GameActivity (ProjectSettings androidApplicationEntry: 2).
+
+     추가한 것: RECORD_AUDIO(음성 인식 마이크) · queries(Android 11+ 음성인식 서비스 조회) -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
+  <uses-permission android:name="android.permission.RECORD_AUDIO" />
+  <queries>
+    <intent>
+      <action android:name="android.speech.RecognitionService" />
+    </intent>
+  </queries>
+  <application>
+    <activity android:name="com.unity3d.player.appui.AppUIGameActivity" android:theme="@style/BaseUnityGameActivityTheme">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
+        <category android:name="android.intent.category.LAUNCHER" />
+      </intent-filter>
+      <meta-data android:name="unityplayer.UnityActivity" android:value="true" />
+      <meta-data android:name="android.app.lib_name" android:value="game" />
+    </activity>
+  </application>
+  <uses-permission android:name="android.permission.VIBRATE" />
+</manifest>

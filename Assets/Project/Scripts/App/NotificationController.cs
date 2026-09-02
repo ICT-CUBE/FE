@@ -154,6 +154,8 @@ namespace ARZone
                 // 높이별 배경이 들어오면 그때 교체한다. 없으면 프리팹의 9-slice 를 그대로 둔다.
                 var cardSpr = lines <= 1 ? cardBg1 : cardBg2;
                 if (cardSpr != null) { bg.sprite = cardSpr; bg.type = Image.Type.Simple; }
+                GlassEdgeGlow.Attach(bg.transform.parent != null ? bg.transform.parent : bg.transform,
+                                     GlassGlowBoot.Round16);                   // 빛나는 부분 테두리
 
                 var btn = row.GetComponent<Button>() ?? row.AddComponent<Button>();
                 btn.targetGraphic = bg;

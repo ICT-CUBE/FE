@@ -16,7 +16,18 @@ namespace ARZone
             public string title;
             public string length;    // 04:24
             public string when;      // 어제 / 3일 전
+            public int id;           // 서버 세션 id (삭제에 쓴다). 0 = 로컬 더미
         }
+
+        // 서버 VOICE 세션 → 화면 모델 (2026-08-25 배선, 유저 결정 "서버로 연결")
+        // 제목 null 은 비운다(텍스트 목록과 같은 결정). length 는 audioDurationSeconds 를 mm:ss 로.
+        public static Session FromServer(ConvSession s) => new Session
+        {
+            id = s.id,
+            title = s.title ?? "",
+            length = $"{s.audioSeconds / 60:00}:{s.audioSeconds % 60:00}",
+            when = s.timeText,
+        };
 
         [Header("이동")]
         [SerializeField] Button btnStart;
@@ -65,6 +76,23 @@ namespace ARZone
             if (btnStart != null) btnStart.onClick.AddListener(GoTalk);
             if (btnAll != null) btnAll.onClick.AddListener(GoList);
             VoiceTopicRow.Build(topicRow, cardSprite, null, OnTopic, fontSource, topicIcons);
+
+            // 서버 VOICE 목록으로 대체. 서버에 세션이 0건이면 목록이 빈다 — 유저 결정.
+            var store = ConversationStore.Instance;
+            if (store != null)
+            {
+                store.OnSessionsChanged += RebuildFromStore;
+                store.LoadSessions(ConversationType.Voice);
+            }
+            BuildRecent();
+        }
+
+        void RebuildFromStore()
+        {
+            var store = ConversationStore.Instance;
+            if (store == null || store.Type != ConversationType.Voice) return;
+            sessions = new List<Session>();
+            foreach (var s in store.Sessions) sessions.Add(FromServer(s));
             BuildRecent();
         }
 
@@ -72,6 +100,8 @@ namespace ARZone
         {
             if (btnStart != null) btnStart.onClick.RemoveListener(GoTalk);
             if (btnAll != null) btnAll.onClick.RemoveListener(GoList);
+            if (ConversationStore.Instance != null)
+                ConversationStore.Instance.OnSessionsChanged -= RebuildFromStore;
         }
 
         void GoList()
@@ -95,7 +125,7 @@ namespace ARZone
         {
             if (recentList == null) return;
             UiUtil.ClearChildren(recentList);
-            if (sessions == null || sessions.Count == 0) sessions = Mock;
+            if (sessions == null) sessions = new List<Session>();   // 서버 0건이면 빈 목록 그대로 (유저 결정)
             float rowW = recentList.sizeDelta.x > 1f ? recentList.sizeDelta.x : 372f;   // rect 는 아직 0
 
             for (int i = 0; i < sessions.Count; i++)

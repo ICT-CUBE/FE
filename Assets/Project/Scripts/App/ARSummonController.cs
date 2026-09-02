@@ -94,6 +94,48 @@ namespace ARZone
             SetActive(modalExit, false);
             SetActive(sheetFramePicker, false);
             ApplyFrame(selectedFrame);
+            LoadServerFrames();
+        }
+
+        // ── 예절샷 프레임을 서버 목록으로 대체 (2026-08-25 배선) ──
+        // 씬의 frames 는 로컬 더미였다. 서버 GET …/album/yezul-frames 가 11개(실URL)를 주므로
+        // '적용 안 함' 칸(시안의 첫 칸)만 남기고 서버 것으로 갈아끼운다.
+        // 실패하면 씬 목록 그대로 — 되던 화면을 깨뜨리지 않는다.
+        bool serverFramesLoaded;
+
+        void LoadServerFrames()
+        {
+            if (serverFramesLoaded) return;
+
+            avatarSrc.LoadYezulFrames(list =>
+            {
+                if (list == null || list.Count == 0) return;
+
+                var items = new List<FrameItem>();
+                items.Add(frames.Count > 0 ? frames[0] : new FrameItem());   // '적용 안 함'
+
+                int remain = list.Count;
+                foreach (var f in list)
+                {
+                    var item = new FrameItem { label = f.title ?? "", overlay = null };
+                    items.Add(item);
+                    ImageCache.Load(f.imageUrl, tex =>
+                    {
+                        if (tex != null)
+                            item.overlay = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height),
+                                                         new Vector2(0.5f, 0.5f), 100f);
+                        if (--remain > 0) return;
+
+                        // 전부 도착했을 때만 갈아끼운다 — 반쯤 빈 목록이 순간적으로 보이지 않게.
+                        serverFramesLoaded = true;
+                        frames = items;
+                        selectedFrame = Mathf.Clamp(selectedFrame, 0, frames.Count - 1);
+                        if (sheetFramePicker != null && sheetFramePicker.activeSelf) BuildFrameList();
+                        Debug.Log($"[Avatar] 예절샷 프레임 {list.Count}개 로드 (씬 더미 대체)");
+                    });
+                }
+            },
+            err => Debug.LogWarning($"[Avatar] 프레임 목록 실패: {err} — 씬 프레임 유지"));
         }
 
         void OnDisable()
@@ -129,7 +171,33 @@ namespace ARZone
             }
             // 캔버스를 통째로 끄면 프레임까지 꺼져서 사진에 안 씌워진다.
             // 조작 UI 만 감추고, 프레임(FrameArt)·카드 마스크는 남긴다.
-            capture.Capture(null, ShotHiddenUi());
+            capture.Capture(UploadShot, ShotHiddenUi());
+        }
+
+        // ── 서버 업로드 (2026-08-25 배선) ──
+        // CaptureService 는 파일이 원본이다 → 그 파일 바이트를 그대로 올린다.
+        // 실패해도 로컬 파일·화면 흐름은 그대로다(리포트/오늘 사진은 로컬 기준으로 계속 돈다).
+        readonly IAvatarSource avatarSrc = new ApiAvatarSource();
+
+        void UploadShot(CaptureService.Entry e)
+        {
+            if (e == null || string.IsNullOrEmpty(e.FilePath)) return;
+            int sid = ARFlowController.SummonSessionId;
+            if (sid <= 0)
+            {
+                Debug.LogWarning("[Avatar] 소환 세션 id 가 없어 업로드를 건너뜀 (생성 실패했거나 아직 응답 전)");
+                return;
+            }
+            byte[] png;
+            try { png = System.IO.File.ReadAllBytes(e.FilePath); }
+            catch (System.Exception ex)
+            {
+                Debug.LogWarning($"[Avatar] 캡처 파일을 못 읽음: {ex.Message}");
+                return;
+            }
+            avatarSrc.UploadPicture(sid, png, e.TakenAt,
+                () => Debug.Log($"[Avatar] 캡처 업로드 완료 (세션 {sid}, {png.Length}B)"),
+                err => Debug.LogWarning($"[Avatar] 캡처 업로드 실패: {err}"));
         }
 
         GameObject[] ShotHiddenUi()

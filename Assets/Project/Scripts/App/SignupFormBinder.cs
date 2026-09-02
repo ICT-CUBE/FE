@@ -24,12 +24,19 @@ namespace ARZone
         [SerializeField] Button next;
         [SerializeField] Image nextBackground;
 
+        // 실제 가입 POST 는 닉네임 화면(NicknameFormBinder)에서 나간다 —
+        // 서버 요청 바디에 nickname·profileCharacterCode 가 필수라 여기선 보낼 수 없다.
+        // 닉네임 화면이 읽어 가도록 입력값을 잠깐 들고 있는다.
+        public static string PendingEmail = "";
+        public static string PendingPassword = "";
+
         void OnEnable()
         {
             if (email != null) email.onValueChanged.AddListener(_ => Refresh());
             if (password != null) password.onValueChanged.AddListener(_ => Refresh());
             if (passwordConfirm != null) passwordConfirm.onValueChanged.AddListener(_ => Refresh());
             if (agree != null) agree.onValueChanged.AddListener(_ => Refresh());
+            if (next != null) next.onClick.AddListener(Stash);
             Refresh();
         }
 
@@ -39,6 +46,13 @@ namespace ARZone
             if (password != null) password.onValueChanged.RemoveAllListeners();
             if (passwordConfirm != null) passwordConfirm.onValueChanged.RemoveAllListeners();
             if (agree != null) agree.onValueChanged.RemoveAllListeners();
+            if (next != null) next.onClick.RemoveListener(Stash);
+        }
+
+        void Stash()
+        {
+            PendingEmail = email != null ? email.text : "";
+            PendingPassword = password != null ? password.text : "";
         }
 
         void Refresh()

@@ -60,6 +60,7 @@ namespace ARZone
                 UiUtil.Place(card, 0f, i * pitchY, cardW, cardH);
 
                 var bg = UiUtil.MakeImage(card, "Bg", sp.card, CardBg, Image.Type.Sliced, true);
+                GlassEdgeGlow.Attach(card.transform, GlassGlowBoot.Round16);   // 빛나는 부분 테두리
                 var brt = (RectTransform)bg.transform;
                 brt.anchorMin = Vector2.zero; brt.anchorMax = Vector2.one;
                 brt.offsetMin = Vector2.zero; brt.offsetMax = Vector2.zero;
@@ -110,7 +111,9 @@ namespace ARZone
                 // 작성자 · 시간
                 var meta = UiUtil.MakeText(card.transform, "Meta", DesignTokens.Type.Caption1,
                                            DesignTokens.Text.Tertiary, TextAlignmentOptions.TopLeft);
-                meta.text = p.author + " · " + p.timeText;
+                // 내 글은 저장 시점 author 가 아니라 현재 프로필 닉네임을 보여준다 —
+                // 프로필을 바꾸면 옛 글에도 즉시 반영 (2026-08-31 "커뮤니티 프로필 연동 안 됨")
+                meta.text = (p.mine ? ProfileStore.Nickname : p.author) + " · " + p.timeText;
                 meta.textWrappingMode = TextWrappingModes.NoWrap;
                 meta.overflowMode = TextOverflowModes.Ellipsis;
                 UiUtil.Place(meta, 16.5f, 148.74f, 310f, 19f);

@@ -61,6 +61,7 @@ namespace ARZone
                 UiUtil.Place(card, col * (cardW + gapX), row * pitchY, cardW, cardH);
 
                 var bg = UiUtil.MakeImage(card, "Bg", cardSprite, CardBg, Image.Type.Sliced, true);
+                GlassEdgeGlow.Attach(card.transform, GlassGlowBoot.Round16);   // 빛나는 부분 테두리
                 var brt = (RectTransform)bg.transform;
                 brt.anchorMin = Vector2.zero; brt.anchorMax = Vector2.one;
                 brt.offsetMin = Vector2.zero; brt.offsetMax = Vector2.zero;

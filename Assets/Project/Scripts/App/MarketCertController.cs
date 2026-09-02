@@ -85,6 +85,22 @@ namespace ARZone
             if (btnChain != null) btnChain.onClick.AddListener(Toggle);
             if (btnClose != null) btnClose.onClick.AddListener(Close);
             open = false;
+
+            // 2026-08-24: 구매 확정(PATCH …/complete)이 돌려준 진짜 증명서가 있으면
+            // 목값(Polygon Mainnet / #31 / 0s3a82… — 시안에서 베낀 것)을 그걸로 대체한다.
+            // 라벨·복사 아이콘·Explore 칩 구성은 씬 그대로다. 확정을 안 거쳐 왔으면 목값이 남는다.
+            var cert = MarketOrderDetailController.LastCertificate;
+            if (cert != null && rows.Count >= 6)
+            {
+                rows[0].value = cert.network;
+                rows[1].value = cert.tokenStandard;
+                rows[2].value = cert.tokenId;
+                rows[3].value = cert.contractAddress;
+                rows[4].value = cert.txHash;
+                rows[5].value = cert.metadataUrl;
+                Debug.Log($"[Market] 증명서 표시 — trade {cert.tradeId}, {cert.network} {cert.tokenId}");
+            }
+
             Build();
             Apply();
         }

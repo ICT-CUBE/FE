@@ -18,6 +18,7 @@ namespace ARZone
             public bool mine;
             public string text;
             public string time;
+            public int id;               // 서버 메시지 id (보관·신고에 쓴다)
             public Texture2D image;      // 이미지 전송이면 여기에 담긴다 (text 는 비운다)
             public Message(bool m, string t, string tm) { mine = m; text = t; time = tm; }
             public Message(Texture2D img, string tm) { mine = true; text = ""; time = tm; image = img; }
@@ -198,6 +199,8 @@ namespace ARZone
                 srt.sizeDelta = scrollBaseSize + new Vector2(0f, -h);
                 srt.anchoredPosition = scrollBasePos + new Vector2(0f, h * 0.5f);
             }
+            // 키보드가 올라오면 대화도 맨 아래(최신)로 따라 올라간다 (2026-08-30 유저 지시)
+            if (h > 0.5f && scroll != null) scroll.verticalNormalizedPosition = 0f;
         }
 
         void LateUpdate()
@@ -211,7 +214,8 @@ namespace ARZone
 
         void OnEnable()
         {
-            if (btnSend != null) btnSend.onClick.AddListener(OnSend);
+            // ⚠ onClick 이 아니라 PointerDown — 키보드 리프트 중 클릭 무산 문제 (UiUtil.OnPointerDown 주석)
+            if (btnSend != null) UiUtil.OnPointerDown(btnSend.gameObject, OnSend);
             if (btnSearch != null) btnSearch.onClick.AddListener(() => Go(searchScreen));
             if (btnArchive != null) btnArchive.onClick.AddListener(() => Go(archiveScreen));
             if (navTitle != null) navTitle.text = avatarName;
@@ -233,11 +237,48 @@ namespace ARZone
 
             ShowTyping(false);
             BuildChips();
+
+            // 2026-08-24: 데이터 출처를 씬 더미 → ConversationStore(서버) 로.
+            // 말풍선·키보드·트레이 로직은 그대로다.
+            var store = ConversationStore.Instance;
+            if (store == null)
+            {
+                Debug.LogError("[Conv] ConversationStore 가 없다 — Canvas/ScreenManager 에 붙일 것");
+                Build();
+                return;
+            }
+            store.OnMessagesChanged += SyncFromStore;
+            localImages.Clear();
+            if (TalkListController.PendingSessionId > 0)
+                store.OpenSession(TalkListController.PendingSessionId);
+            else
+                SyncFromStore();      // 목록에서 '새 대화'로 이미 세션을 만들어 둔 경우
+        }
+
+        // 서버 메시지 + (아직 서버로 못 보낸) 로컬 사진을 합쳐 화면 목록을 다시 만든다.
+        // ⚠ 대화 상세 조회 응답에는 imageUrls 가 없다. 그래서 사진은 서버에서 복원되지 않는다.
+        //    지금은 화면을 떠나면 사라진다 — 서버에 이미지 업로드 경로가 생기면 그때 붙인다.
+        readonly List<Message> localImages = new List<Message>();
+
+        void SyncFromStore()
+        {
+            var store = ConversationStore.Instance;
+            messages.Clear();
+            if (store != null)
+                foreach (var m in store.Messages)
+                    messages.Add(new Message(m.mine, m.text, m.timeText) { id = m.id });
+            messages.AddRange(localImages);
             Build();
         }
 
         void OnDisable()
         {
+            if (ConversationStore.Instance != null)
+            {
+                ConversationStore.Instance.OnMessagesChanged -= SyncFromStore;
+                // 화면을 떠나며 세션 종료 — 서버가 제목 없는 대화에 GPT 제목을 붙인다 (2026-08-26)
+                ConversationStore.Instance.CloseCurrent();
+            }
             if (btnSend != null) btnSend.onClick.RemoveAllListeners();
             if (btnSearch != null) btnSearch.onClick.RemoveAllListeners();
             if (btnArchive != null) btnArchive.onClick.RemoveAllListeners();
@@ -274,7 +315,9 @@ namespace ARZone
             // (예전엔 밝은 회색 바라 검정이었고, 바만 어둡게 바꿨더니 글자가 안 보였다)
             tt.color = DesignTokens.Text.Primary;
             tt.alignment = TextAlignmentOptions.MidlineLeft;
-            tt.richText = false;
+            // ⚠ richText 를 끄면 안 된다 — 한글 조합 중 TMP 가 <u>조합글자</u> 로 밑줄을 치는데,
+            //   꺼져 있으면 태그가 글자로 그대로 보인다(실기: "</u>" 노출, 2026-08-27).
+            tt.richText = true;
             // ★ 이걸 안 끄면 투명한 글자 판이 첨부 트레이 위를 덮어 × 클릭을 먹는다.
             //   (2026-08-21 실기: × 를 눌러도 onClick 로그조차 안 찍혔다)
             //   입력 포커스는 InputBar 자체 Image 가 받으므로 글자는 레이캐스트를 안 받아도 된다.
@@ -284,6 +327,7 @@ namespace ARZone
             var field = inputBar.gameObject.AddComponent<TMP_InputField>();
             field.textViewport = art;
             field.textComponent = tt;
+            InputFieldTuner.Tune(field);   // ⚠ textComponent 배선 뒤에 불러야 캐럿(|)이 생긴다
             field.placeholder = placeholder;
             field.lineType = TMP_InputField.LineType.SingleLine;
             field.characterLimit = 500;
@@ -501,12 +545,23 @@ namespace ARZone
                 lrt.offsetMin = new Vector2(bubblePadX, bubblePadY);
                 lrt.offsetMax = new Vector2(-bubblePadX, -bubblePadY);
 
-                // 글자수에 맞춰 말풍선이 줄었다 늘었다 한다
-                w = Mathf.Min(bubbleMaxW, MeasureBubbleWidth(t, m.text) + bubblePadX * 2f);
+                // 글자수에 맞춰 말풍선이 줄었다 늘었다 한다.
+                // ★ 아바타 말풍선은 오른쪽에 시각(12px, 실폭 ~52)이 붙는다.
+                //   최대폭 300 을 그대로 쓰면 시각 x = 80+300+8.39 = 388 로 화면(412) 밖 →
+                //   실기에서 "오후 12:0" 처럼 잘렸다. 시각 자리(60)를 빼고 접는다.
+                float maxW = bubbleMaxW;
+                if (!m.mine && !string.IsNullOrEmpty(m.time))
+                    // ★ 화면(412)이 아니라 **뷰포트(372, 마스크)** 가 자른다 — root 기준으로 계산.
+                    //   말풍선 root x = bubbleLeftX-20, 시각 = +8.39, 시각 글자 ~55 여유 60.
+                    maxW = Mathf.Min(bubbleMaxW, 372f - (bubbleLeftX - 20f) - 8.39f - 60f);
+                w = Mathf.Min(maxW, MeasureBubbleWidth(t, m.text) + bubblePadX * 2f);
                 h = t.GetPreferredValues(m.text, w - bubblePadX * 2f, 0f).y + bubblePadY * 2f;
             }
             brt.sizeDelta = new Vector2(w, h);
-            brt.anchoredPosition = new Vector2(m.mine ? -(412f - bubbleRightEdge) : bubbleLeftX, 0f);
+            // ★ root 는 화면(412)이 아니라 372(좌우 여백 20 안쪽)다 — 시안의 화면 좌표를
+            //   root 좌표로 옮기려면 20 을 빼야 한다. 안 빼서 전부 20px 오른쪽으로 밀려 있었고,
+            //   아바타 시각은 화면 밖(425)까지 나가 "오후 3" 에서 잘렸다 (2026-08-27 실기).
+            brt.anchoredPosition = new Vector2(m.mine ? -(392f - bubbleRightEdge) : bubbleLeftX - 20f, 0f);
 
             // 시각 — 시안 48: 말풍선 바깥쪽, 하단에서 13.55 위. 12px white
             //   아바타는 말풍선 오른쪽 +8.39, 내 것은 화면 왼쪽 여백(20.39)에 붙는다
@@ -530,8 +585,8 @@ namespace ARZone
                 trt.pivot = new Vector2(m.mine ? 1f : 0f, 1f);
                 float ty = (m.mine ? 0f : 30f) + h - 13.55f - 6f;   // 하단에서 13.55 위(잉크), 12px 박스 보정
                 trt.anchoredPosition = new Vector2(
-                    m.mine ? -(412f - bubbleRightEdge) - w - 8.39f    // 말풍선 왼쪽 모서리에서 8.39 왼쪽
-                           : bubbleLeftX + w + 8.39f, -ty);
+                    m.mine ? -(392f - bubbleRightEdge) - w - 8.39f    // 말풍선 왼쪽 모서리에서 8.39 왼쪽
+                           : bubbleLeftX - 20f + w + 8.39f, -ty);     // root 여백 20 보정
                 trt.sizeDelta = new Vector2(70f, 16f);
             }
 
@@ -543,14 +598,15 @@ namespace ARZone
                 var nt = UiUtil.MakeText(root.transform, "Name", DesignTokens.Type.Caption1,
                                          DesignTokens.Text.Primary);
                 nt.text = avatarName;
-                UiUtil.Place(nt, 80.36f, 0f, 200f, 20f);
+                // 이름 시작점 = 말풍선 왼쪽 (유저 지시 2026-08-27 — 같은 변수로 묶어 영원히 정렬)
+                UiUtil.Place(nt, bubbleLeftX - 20f, 0f, 200f, 20f);
 
-                brt.anchoredPosition = new Vector2(bubbleLeftX, -30f);
+                brt.anchoredPosition = new Vector2(bubbleLeftX - 20f, -30f);   // ★ 여기가 558의 보정을 덮어쓰고 있었다 (root 여백 20)
                 total = h + 30f;
 
                 // 프로필 — 시안은 원형으로 잘려 있다. Mask 안에 사진, 그 위에 1px 테두리.
                 var maskImg = UiUtil.MakeImage(root.transform, "AvatarMask", circleSprite, Color.white);
-                UiUtil.Place(maskImg, 19.5f, -4.77f, 45f, 45f);
+                UiUtil.Place(maskImg, -0.5f, -4.77f, 45f, 45f);   // 화면 19.5 - root 여백 20
                 var mask = maskImg.gameObject.AddComponent<Mask>();
                 mask.showMaskGraphic = false;
                 var fi = UiUtil.MakeImage(maskImg.transform, "Avatar", avatarSprite,
@@ -560,17 +616,26 @@ namespace ARZone
                 frt.offsetMin = Vector2.zero; frt.offsetMax = Vector2.zero;
                 var ring = UiUtil.MakeImage(root.transform, "AvatarRing", circleStrokeSprite,
                                             DesignTokens.Stroke.Regular);
-                UiUtil.Place(ring, 19.5f, -4.77f, 45f, 45f);
+                UiUtil.Place(ring, -0.5f, -4.77f, 45f, 45f);
 
                 // 액션 행 — 시안: 말풍선 아래 12, 32×32 원, 간격 8(피치 40)
                 //   마지막 답변엔 북마크/재생성/신고 3개, 그 앞엔 북마크만
                 total += actionGap + actionSize;
                 float ay = 30f + h + actionGap;
-                MakeAction(rrt, bubbleLeftX, ay, icScrap, null);
+                // 보관(북마크) — 서버에 저장하고 토스트. 보관함 화면(TalkArchive)에서 보인다.
+                // (2026-08-27 배선 — 전엔 onClick 이 null 이라 아무 일도 안 했다)
+                int saveId = m.id;
+                MakeAction(rrt, bubbleLeftX - 20f, ay, icScrap, () =>
+                {
+                    var st = ConversationStore.Instance;
+                    if (st == null || saveId <= 0) { Toast.Show("보관할 수 없는 메시지예요"); return; }
+                    st.SaveText(saveId, ok => Toast.Show(ok ? "보관함에 저장했어요" : "이미 보관된 대화예요"));
+                });
                 if (lastReply)
                 {
-                    MakeAction(rrt, bubbleLeftX + actionPitch, ay, icRegen, null);
-                    MakeAction(rrt, bubbleLeftX + actionPitch * 2f, ay, icReport, OpenReport);
+                    MakeAction(rrt, bubbleLeftX - 20f + actionPitch, ay, icRegen, null);
+                    int reportId = m.id;      // 이 답변을 신고 대상으로 넘긴다
+                    MakeAction(rrt, bubbleLeftX - 20f + actionPitch * 2f, ay, icReport, () => OpenReport(reportId));
                 }
             }
 
@@ -611,8 +676,9 @@ namespace ARZone
             });
         }
 
-        void OpenReport()
+        void OpenReport(int messageId)
         {
+            ReportSheetController.PendingMessageId = messageId;   // 시트가 전송할 때 쓴다
             if (reportSheet != null) reportSheet.Open();
             else Debug.LogWarning("[TalkDetail] reportSheet 미연결 — Sheet_Report 를 인스펙터에 물릴 것");
         }
@@ -635,22 +701,32 @@ namespace ARZone
                 return;
             }
 
-            // 사진을 먼저 올리고 그 뒤에 글을 올린다 — 한 번의 전송으로 같이 나간다.
+            // 사진은 서버로 보낼 방법이 없다(요청이 imageUrls 를 받는데 업로드 경로가 없다).
+            // 화면에는 시안대로 띄우되 로컬로만 들고 있는다.
             foreach (var img in pending)
-                if (img != null) messages.Add(new Message(img, Now()));
+                if (img != null) localImages.Add(new Message(img, Now()));
             pending.Clear();
             AttachmentsChanged?.Invoke();
             BuildTray();
             LayoutBar();
 
-            if (hasText) messages.Add(new Message(true, text.Trim(), Now()));
             if (input != null) input.text = "";
             chipPicked = -1;
             SyncChips();
-            Build();
 
-            if (typing != null) StopCoroutine(typing);
-            typing = StartCoroutine(WaitReply());
+            var store = ConversationStore.Instance;
+            if (hasText && store != null)
+            {
+                // 서버가 유저 메시지와 아바타 답변을 한 번에 돌려준다.
+                // 둘 다 Store 에 쌓이고 OnMessagesChanged → SyncFromStore 로 화면이 갱신된다.
+                store.Send(text.Trim());
+                if (typing != null) StopCoroutine(typing);
+                typing = StartCoroutine(WaitReply());
+            }
+            else
+            {
+                SyncFromStore();
+            }
         }
 
         // ── 입력창 자동 높이 · 첨부 트레이 (시안 개정판 '사진과 글 첨부', 3x PNG 실측) ──
@@ -843,7 +919,13 @@ namespace ARZone
             ShowTyping(true);
             float t = 0f;
             int frame = 0;
-            while (t < replyDelay)
+            var store = ConversationStore.Instance;
+
+            // ★ 고정 시간이 아니라 '서버 응답이 올 때까지' 기다린다.
+            //   아바타 답변은 서버가 매번 생성하므로 걸리는 시간이 일정하지 않다.
+            //   (처음엔 replyDelay 를 최소 표시로 뒀는데, 답 말풍선이 뜬 뒤에도
+            //    점이 남아 있어 이상했다 → 응답이 오면 바로 끈다.)
+            while (store != null && store.Sending)
             {
                 t += Time.deltaTime;
                 if (typingDots != null && typingFrames != null && typingFrames.Length > 0)
@@ -851,16 +933,39 @@ namespace ARZone
                     frame = Mathf.FloorToInt(t * typingFps) % typingFrames.Length;
                     typingDots.sprite = typingFrames[frame];
                 }
+                if (t > 60f) { Debug.LogWarning("[Conv] 응답이 60초를 넘겨 대기를 멈춘다"); break; }
                 yield return null;
             }
             ShowTyping(false);
-            Debug.Log("[TalkDetail] 응답 대기 — AI 인터페이스 연결 필요");
             typing = null;
         }
 
         void ShowTyping(bool on)
         {
-            if (typingDots != null) typingDots.gameObject.SetActive(on);
+            if (typingDots == null) return;
+
+            if (on && content != null)
+            {
+                // ★ 씬에는 (80,-232) 고정으로 박혀 있어 대화 길이와 무관한 자리에 떴다 →
+                //   대화 내용(content) 밑, 다음 답이 나타날 바로 그 자리(왼쪽)에 붙인다.
+                var rt = (RectTransform)typingDots.transform;
+                rt.SetParent(content, false);
+                rt.anchorMin = rt.anchorMax = new Vector2(0f, 1f);
+                rt.pivot = new Vector2(0f, 1f);
+                // 시안 실측 (sian90/텍스트 대화 상세/첫대화.png, 3x): 점 3개 잉크 54×21px
+                // = 캔버스 18×7, 왼쪽 시작 x 288px = 캔버스 96 (2026-08-30 유저 지시로 재실측).
+                rt.sizeDelta = new Vector2(18f, 7f);
+                float y = content.sizeDelta.y + gap;
+                rt.anchoredPosition = new Vector2(96f, -y);
+                // 점 높이만큼만 늘리면 뷰포트 바닥에 딱 붙어 잘렸다 — 아래 여유 14 를 더한다
+                content.sizeDelta = new Vector2(content.sizeDelta.x, y + 7f + 14f);
+
+                // 켜지는 순간 sprite 가 None 이면 흰/회색 판이 한 프레임 보인다 → 첫 프레임을 즉시.
+                if (typingFrames != null && typingFrames.Length > 0) typingDots.sprite = typingFrames[0];
+                typingDots.gameObject.SetActive(true);
+                Bottom();
+            }
+            else typingDots.gameObject.SetActive(false);
         }
 
         void Bottom()

@@ -37,10 +37,20 @@ namespace ARZone
             Load(Board, Query);
         }
 
+        // 정렬 상태 (2026-08-31 유저 지시: 상단 화살표 토글 — 아래 화살표 = 오래된순)
+        public CommunitySort Sort { get; private set; } = CommunitySort.Latest;
+
+        public void SetSort(CommunitySort s)
+        {
+            if (Sort == s) return;
+            Sort = s;
+            Load(Board, Query);
+        }
+
         public void Load(string board, string query)
         {
             Board = board; Query = query;
-            src.LoadPosts(board, query, CommunitySort.Latest, list =>
+            src.LoadPosts(board, query, Sort, list =>
             {
                 cache.Clear(); cache.AddRange(list);
                 OnChanged?.Invoke();

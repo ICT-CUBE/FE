@@ -1,19 +1,18 @@
 # Intro : JANE with FKJ — 가사 싱크 파일 (LRC 형식)
 # 타임스탬프 [분:초.centi] 를 각 줄 앞에 붙이면 싱크됩니다. 지금은 가사만 있습니다.
 # 원본: 가사 모음.docx (2026-08-08)
-
-Run like this, run, I
-Run like this, run, love you
-But you run like this, run like
-Run like this, run, love you
-Like
-Like
-Like
-Run like
-Like
-Like
-(Like, like, like)
-Run like this, run, I
-Run like this, run, love you
-But you run like this, run, I
-Run like this, run, love
+[00:00.99]Run like this, run, I
+[00:05.63]Run like this, run, love you
+[00:10.05]But you run like this, run like
+[00:15.37]Run like this, run, love you
+[00:20.75]Like
+[00:30.72]Like
+[00:40.52]Like
+[00:49.60]Run like
+[01:00.05]Like
+[01:09.94]Like
+[01:17.16](Like, like, like)
+[01:19.11]Run like this, run, I
+[01:24.02]Run like this, run, love you
+[01:28.51]But you run like this, run, I
+[01:33.67]Run like this, run, love

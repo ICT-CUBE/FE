@@ -36,6 +36,20 @@ namespace ARZone
         [SerializeField] Button btnConfirmYes;
         [SerializeField] string doneScreen = "MarketPurchaseDone";
 
+        // 2026-08-24: 목 타임라인 → 서버(GET …/trades/{id})로 대체.
+        // 내 거래 내역 목록은 서버 목록 API 가 없어(백엔드 미구현) 그대로다 →
+        // 어느 거래를 보여줄지는 이 값이 정한다.
+        // 2026-08-25 시드 개편: 거래 2·3 삭제, 거래 1 = DELIVERED(구매 확정 가능) → 1 로.
+        [SerializeField] int tradeId = 1;
+        [Header("주문 정보 라벨 (서버 값으로 채움 — 비워두면 안 건드린다)")]
+        [SerializeField] TMP_Text labelProduct;    // cube.productName
+        [SerializeField] TMP_Text labelPrice;      // price ("42,000원")
+
+        // 구매 확정이 돌려주는 블록체인 증명서. 증명서 화면(MarketCertController)이 읽는다.
+        public static TradeCertificateDto LastCertificate;
+
+        IMarketSource src;
+
         static readonly Color Sub  = new Color32(0xD3, 0xD5, 0xDD, 0xFF);
         static readonly Color Off  = new Color32(0x72, 0x78, 0x86, 0xFF);
         static readonly Color LineOn  = new Color32(0x7C, 0x3A, 0xED, 0xFF);
@@ -52,7 +66,49 @@ namespace ARZone
             if (btnConfirmCancel != null) btnConfirmCancel.onClick.AddListener(CloseConfirm);
             if (btnConfirmYes != null) btnConfirmYes.onClick.AddListener(ConfirmYes);
             CloseConfirm();
+            Build();                              // 먼저 씬 값으로 그린다 — 서버가 늦어도 화면이 비지 않게
+
+            if (src == null) src = new ApiMarketSource();
+            src.LoadTrade(tradeId, Apply, err =>
+            {
+                // 실패하면 씬(목) 값이 그대로 남는다. 로그에만 진실을 남긴다.
+                Debug.LogWarning($"[Market] 거래 {tradeId} 조회 실패: {err} (씬 값 유지)");
+            });
+        }
+
+        // 서버 타임라인으로 목값을 대체한다.
+        // ★ Step.icon(배지 스프라이트)은 서버가 안 주므로 씬 것을 유지하고,
+        //   글자(title)·시각(time)·진행 단계(currentStep)만 갈아끼운다.
+        void Apply(TradeDto trade)
+        {
+            if (trade == null || trade.timeline == null) return;
+
+            int n = Mathf.Min(steps.Count, trade.timeline.Length);
+            if (steps.Count != trade.timeline.Length)
+                Debug.LogWarning($"[Market] 씬 단계 {steps.Count}개 vs 서버 {trade.timeline.Length}개 — 앞 {n}개만 반영");
+
+            int firstIncomplete = trade.timeline.Length;
+            for (int i = 0; i < n; i++)
+            {
+                var t = trade.timeline[i];
+                steps[i].title = t.label;                       // 서버가 한국어 라벨을 준다
+                steps[i].time = FmtTime(t.time);
+                if (!t.completed && firstIncomplete > i) firstIncomplete = i;
+            }
+            currentStep = firstIncomplete;                      // 이 단계까지 완료(0-based)
+
+            if (labelProduct != null && trade.cube != null) labelProduct.text = trade.cube.productName;
+            if (labelPrice != null) labelPrice.text = $"{trade.price:N0}원";
             Build();
+        }
+
+        // "2026-08-07T15:00:00" → "2026.08.07 15:00" (씬 목값과 같은 표기)
+        static string FmtTime(string iso)
+        {
+            if (string.IsNullOrEmpty(iso)) return "";
+            return System.DateTime.TryParse(iso, System.Globalization.CultureInfo.InvariantCulture,
+                                            System.Globalization.DateTimeStyles.None, out var t)
+                ? t.ToString("yyyy.MM.dd HH:mm") : "";
         }
 
         void OnDisable()
@@ -74,11 +130,31 @@ namespace ARZone
             if (modalConfirm != null) modalConfirm.SetActive(false);
         }
 
+        bool confirming;   // 응답 전 재클릭 방지
+
+        // 2026-08-28 유저 지시: 성공해야만 완료 화면으로 간다.
+        // (예전엔 실패해도 진행했는데, 그러면 LastCertificate 가 이전 거래 값인 채
+        //  증명서 화면이 읽어서 남의 증명서가 뜬다)
         void ConfirmYes()
         {
+            if (confirming) return;
             CloseConfirm();
-            if (ScreenManager.Instance != null && !string.IsNullOrEmpty(doneScreen))
-                ScreenManager.Instance.Show(doneScreen);
+            if (src == null) src = new ApiMarketSource();
+            confirming = true;
+            src.CompleteTrade(tradeId,
+                cert =>
+                {
+                    confirming = false;
+                    LastCertificate = cert;     // 증명서 화면이 이 값을 읽는다
+                    if (ScreenManager.Instance != null && !string.IsNullOrEmpty(doneScreen))
+                        ScreenManager.Instance.Show(doneScreen);
+                },
+                err =>
+                {
+                    confirming = false;
+                    Toast.Show(err);
+                    Debug.LogWarning($"[Market] 구매 확정 실패: {err}");
+                });
         }
 
         void Build()

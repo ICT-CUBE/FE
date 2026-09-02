@@ -86,7 +86,62 @@ namespace ARZone
             if (btnCancel != null) btnCancel.onClick.AddListener(Cancel);
             if (btnClearAll != null) btnClearAll.onClick.AddListener(ClearAll);
             query = input != null ? input.text : "";
+            LoadRecent();      // 저장된 최근 검색 복원
             Rebuild();
+            LoadRealLines();   // 서버 대화를 검색 대상으로 (2026-08-27 — 전엔 더미 6줄만 검색됐다)
+        }
+
+        // ── 최근 검색 (2026-08-27 — 전엔 더미 5개 고정이라 검색해도 칩이 안 쌓였다) ──
+        const string RecentKey = "arzone.talksearch.recent";
+
+        void LoadRecent()
+        {
+            string saved = PlayerPrefs.GetString(RecentKey, null);
+            if (saved == null) return;                      // 저장된 적 없으면 씬 더미 유지
+            recent.Clear();
+            foreach (var r in saved.Split('\n'))
+                if (!string.IsNullOrWhiteSpace(r)) recent.Add(r);
+        }
+
+        void SaveRecent() => PlayerPrefs.SetString(RecentKey, string.Join("\n", recent));
+
+        // 엔터로 검색을 확정하면 최근 검색 맨 앞에 쌓인다 (중복 제거, 최대 10개)
+        public void AddRecent(string v)
+        {
+            v = (v ?? "").Trim();
+            if (v.Length == 0) return;
+            recent.Remove(v);
+            recent.Insert(0, v);
+            if (recent.Count > 10) recent.RemoveRange(10, recent.Count - 10);
+            SaveRecent();
+            BuildChips();
+        }
+
+        // 전체 TEXT 세션의 메시지를 긁어 검색 대상(lines)을 실데이터로 바꾼다.
+        // 대화 검색 API 는 서버에 없어서 목록+상세를 합쳐 앱에서 찾는다(세션 몇 개 수준이라 충분).
+        // 실패하면 더미가 남아 화면이 비지 않는다.
+        void LoadRealLines()
+        {
+            var src = new ApiConversationSource();
+            src.LoadSessions(ConversationType.Text, 0, 100, (sessions, _) =>
+            {
+                if (sessions == null || sessions.Count == 0) return;
+                bool cleared = false;
+                foreach (var s in sessions)
+                {
+                    string when = s.timeText;   // 메시지엔 날짜가 없다 — 세션의 시각 표기를 쓴다
+                    src.LoadMessages(s.id, msgs =>
+                    {
+                        if (!cleared) { lines.Clear(); cleared = true; }   // 첫 응답에서 더미 제거
+                        foreach (var m in msgs)
+                            if (!string.IsNullOrWhiteSpace(m.text))
+                                lines.Add(new Line(m.text, when));
+                        if (!string.IsNullOrEmpty(query)) BuildResults();
+                    },
+                    err => Debug.LogWarning($"[TalkSearch] 세션 {s.id} 메시지 실패: {err}"));
+                }
+            },
+            err => Debug.LogWarning($"[TalkSearch] 세션 목록 실패: {err} — 더미로 검색"));
         }
 
         void OnDisable()
@@ -113,15 +168,19 @@ namespace ARZone
             var trt = (RectTransform)tt.transform;
             trt.anchorMin = Vector2.zero; trt.anchorMax = Vector2.one;
             trt.offsetMin = Vector2.zero; trt.offsetMax = Vector2.zero;
-            tt.richText = false;
+            // ⚠ richText 를 끄면 안 된다 — 한글 조합 중 TMP 가 <u>조합글자</u> 로 밑줄을 치는데,
+            //   꺼져 있으면 태그가 글자로 그대로 보인다(실기: "</u>" 노출, 2026-08-27).
+            tt.richText = true;
 
             var field = searchBar.gameObject.AddComponent<TMP_InputField>();
             field.textViewport = art;
             field.textComponent = tt;
+            InputFieldTuner.Tune(field);   // ⚠ textComponent 배선 뒤에 불러야 캐럿(|)이 생긴다
             field.placeholder = searchHint;
             field.lineType = TMP_InputField.LineType.SingleLine;
             field.characterLimit = 50;
             field.onValueChanged.AddListener(OnQueryChanged);
+            field.onSubmit.AddListener(AddRecent);          // 엔터 = 검색 확정 → 최근 검색 칩
             input = field;
         }
 
@@ -139,6 +198,7 @@ namespace ARZone
         void ClearAll()
         {
             recent.Clear();
+            SaveRecent();
             Rebuild();
         }
 
